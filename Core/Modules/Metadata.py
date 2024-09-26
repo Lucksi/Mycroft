@@ -94,7 +94,7 @@ class DOCUMENTS:
                     key2 = "RichMedia"
                     suspect_keys.append(key2)
                 if b"/EmbeddedFile" in line or b"/EmbeddedFile " in line:
-                    key = "EmbeddedFile"
+                    key2 = "EmbeddedFile"
                     suspect_keys.append(key2)
                 if b"/ObjStm" in line or b"/ObjStm " in line:
                     key2 = "ObjectStream"
