@@ -19,8 +19,8 @@ class GET:
             d = 0
             f = 0
             for file in os.listdir(name):
-                f = f +1
                 if os.path.isfile(name + "/" + file):
+                    f = f +1
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "File n°{}: {}".format(Colors.Color.GREEN + str(f) + Colors.Color.WHITE,Colors.Color.GREEN + file))
                 else:
                     d = d +1 
