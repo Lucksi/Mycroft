@@ -23,6 +23,7 @@ class MAIN:
             n = 0
         else:
             f_name = f_name.rstrip()
+            n = 1
         if inp_folder == 0:
             filename = name
             c = name.count("/")
