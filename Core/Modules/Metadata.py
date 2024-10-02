@@ -957,7 +957,6 @@ class DOCUMENTS:
                 f = open(output,"a")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(name),f,"File-name: ")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(creator),f,"Creation-Date: ")
-                Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(pdf_version),f,"Pdf-Version: ")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(extid),f,"Ext-Id: ")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(fbid),f,"Fb-Id: ")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(touchtype),f,"Touchtype: ")
