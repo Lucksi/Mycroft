@@ -16,7 +16,7 @@ from Core.Utils import Colors
 class MAIN:
      
     @staticmethod
-    def GET_DATA(name,adv,vrb,out,extr,folder,inp_folder,f_name):
+    def GET_DATA(name,adv,vrb,out,extr,folder,inp_folder,f_name,txt_ext,term):
         extension = name.split(".",1)[1]
         if f_name == "":
             f_name = name
@@ -57,7 +57,7 @@ class MAIN:
                 if out == 1:
                    date = datetime.datetime.now()
                    Write_File.OUTPUT.HEADER_FILE("Metadata",output,date,name)
-                Metadata.DOCUMENTS.File(extension,filename,name,adv,vrb,out,output,extr)
+                Metadata.DOCUMENTS.File(extension,filename,name,adv,vrb,out,output,extr,txt_ext,term)
                 print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Output Saved on: {}".format(Colors.Color.GREEN + outfolder2))
             else:
                 print(Colors.Color.RED + "[!]" + Colors.Color.WHITE + "File not Found")

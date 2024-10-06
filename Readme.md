@@ -59,7 +59,9 @@ python3 main.py
 | `--output`  | Insert path to a custom output folder | --output /home/test/Desktop |
 | `--ext_d`  | List Files of an external directory | list --ext_d /home/test/Desktop |
 | `--folder_name`  | Change the name of the output directory | --folder_name Test |
-| `--advanced`  | Extract advanced information from metadata | test.docx --advanced
+| `--advanced`  | Extract advanced information from metadata | test.docx --advanced |
+| `--text`  | Extract file text-content from document | test.docx --text |
+| `--search`  | Search for a specific keyword in the document | test.docx --text --search Test |
 | `--verbose`  | Disable screen output | test.docx --verbose
 | `--noOutput`  | Disable file output | test.docx --noOutput
 | `--extraction`  | Extract media from documents or files from archives| test.docx --extraction
@@ -68,14 +70,16 @@ python3 main.py
 
 | Description | File-Format |
 | ------------- | ------------- |
-| Extract metadata  | docx, pdf, xlsx, pptx, jpg, png, mp4, odt, odp, odc, zip, psd|
+| Extract metadata  | docx, pdf, xlsx, pptx, jpg, png, mp4, odt, odp, odc, zip, apk, jar, psd|
 | Get file hashes  | All formats |
 | Get local informations  | All formats |
 | Extract and Download media  | docx, pptx, odp, odt |
-| Extract files  | zip |
-| Get archives file information  | zip |
-| Get archive information  | zip |
-| Recognize archive Compression Type  | zip |
+| Extract Text  | docx, pptx, odt |
+| Search Keyword  | docx, pptx, odt |
+| Extract files  | zip, apk, jar |
+| Get archives file information  | zip, apk, jar |
+| Get archive information  | zip, apk, jar |
+| Recognize archive Compression Type  | zip, apk, jar |
 | Recognize Suspicious keywords  | pdf |
 
 ## File Hashing formats:
@@ -100,16 +104,16 @@ python3 main.py
 
 | Name | Archive Format |
 | ------------- |  ------------- |
-| `Storage`  | zip |
-| `Deflate`  | zip |
-| `Enhanced Deflate`  | zip |
-| `Bzip2`  | zip |
-| `LZMA`  | zip |
-| `Wavpack`  | zip |
-| `JPEG`  | zip |
-| `XZ`  | zip |
-| `PPMD`  | zip |
-| `AES`  | zip |
+| `Storage`  | zip, apk, jar |
+| `Deflate`  | zip, apk, jar |
+| `Enhanced Deflate`  | zip, apk, jar |
+| `Bzip2`  | zip, apk, jar |
+| `LZMA`  | zip, apk, jar |
+| `Wavpack`  | zip, apk, jar |
+| `JPEG`  | zip, apk, jar |
+| `XZ`  | zip, apk, jar |
+| `PPMD`  | zip, apk, jar |
+| `AES`  | zip, apk, jar |
 
 ## STARGAZERS OVER TIME 
 

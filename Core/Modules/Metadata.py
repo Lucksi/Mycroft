@@ -10,6 +10,8 @@ from Core.Modules import Reader as Decoder
 from Core.Modules.Images import Dimension
 from Core.Modules.Media import Extraction
 from Core.Modules.Archives import Properties
+from Core.Modules.Documents import Content
+from Core.Modules import Finder
 from time import sleep
 import zipfile
 import xml.dom.minidom
@@ -19,7 +21,7 @@ import os
 class DOCUMENTS:
 
     @staticmethod
-    def File(extension,origfile,name,adv,vrb,out,output,extr):
+    def File(extension,origfile,name,adv,vrb,out,output,extr,txt_ext,term):
         if extension == "pdf":
             print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Extracting Pdf Metadata")
             sleep(2)
@@ -517,6 +519,7 @@ class DOCUMENTS:
                 h_slides = Decoder.EXTRACTOR.XML_Metadata(document2,"HiddenSlides")
                 mmclips = Decoder.EXTRACTOR.XML_Metadata(document2,"MMClips")
                 app_v = Decoder.EXTRACTOR.XML_Metadata(document2,"AppVersion")
+                
                 if adv == 1:
                     file_list = myFile.namelist()
                     Extraction.FILE.MIC_Format(file_list,extension,extr,myFile,out3,images_s,type_images,out2,media_s,type_media)
@@ -568,8 +571,7 @@ class DOCUMENTS:
                 if t_time != "None":
                     t_time2 = int(t_time)/60
                     if t_time2 < 1:
-                        #print(t_time2)
-                        t_time = t_time + " Minutes"#"< 60 Minutes"
+                        t_time = t_time + " Minutes"
                     elif t_time2 < 24:
                         t_time = str(t_time2) + " Hours"
                     else:
@@ -630,7 +632,7 @@ class DOCUMENTS:
                         v = v + 1
             else:
                 print(Colors.Color.BLUE + "[I]" + Colors.Color.WHITE + "Process completed")
-            
+                
             if out == 1:
                 f = open(output,"a")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(name),f,"File-name: ")
@@ -669,6 +671,31 @@ class DOCUMENTS:
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(c_space),f,"Characters-With-Space: ")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(app_v),f,"App-Version: ")
                 f.close()
+            
+            if txt_ext == 1:
+                print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Extracting text from file")
+                output = output.replace("Metadata.txt","Content.txt")
+                if extension == "docx":
+                    document4 = xml.dom.minidom.parseString(myFile.read('word/document.xml'))
+                    result = document4.getElementsByTagName("w:t")
+                    sleep(3)
+                    Content.GET.DOC_TEXT(result,output)
+                elif extension == "odt" or extension == "odp":
+                    document4 = xml.dom.minidom.parseString(myFile.read('content.xml'))
+                    if extension == "odt" or extension == "odp":
+                        result = document4.getElementsByTagName("text:span")
+                        Content.GET.DOC_TEXT(result,output)
+                elif extension == "pptx":
+                    Content.GET.PPTX_TEXT(myFile,output)
+                if term != "":
+                    print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Searching for {}".format(Colors.Color.GREEN + term + Colors.Color.WHITE))
+                    sleep(3)
+                    found = Finder.OBJECT.FOUND(output,term)[0]
+                    lines = Finder.OBJECT.FOUND(output,term)[1]
+                    if found != "Not Found":
+                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Term: {} found {} times on line: {}".format(Colors.Color.GREEN + term + Colors.Color.WHITE,Colors.Color.GREEN + found + Colors.Color.WHITE,Colors.Color.GREEN + lines.replace("[","").replace("]","") ))
+                    else:
+                        print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "Term: {} Not found".format(Colors.Color.GREEN + term + Colors.Color.WHITE))
         
         elif extension == "jpg" or extension == "jpeg" or extension == "png" or extension == "psd" or extension == "gif":
             print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Extracting Image Metadata")
@@ -961,7 +988,7 @@ class DOCUMENTS:
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(fbid),f,"Fb-Id: ")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(touchtype),f,"Touchtype: ")
                 f.close()
-        elif extension == "zip":
+        elif extension == "zip" or extension == "apk" or extension == "jar":
             Properties.GET.ZIP_FILE(origfile,output,extr,out,vrb)
         else:
-            print("Not supported {} files".format(extension))
+            print(Colors.Color.RED + "\n[!]" + Colors.Color.WHITE + "Not supported {} files".format(Colors.Color.GREEN + extension + Colors.Color.WHITE))

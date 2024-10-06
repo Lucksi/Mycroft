@@ -12,17 +12,19 @@ class MAIN:
 
     @staticmethod
     def Options():
-        print(Colors.Color.ORANGE + "-------------------------------------------------------------------------------------")
-        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--internal:" + Colors.Color.WHITE + " Scan files from 'Files' internal folder ex: " + Colors.Color.GREEN + "'test.docx --internal'" + Colors.Color.ORANGE + "     |")
-        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--output:" + Colors.Color.WHITE + " Insert path to a custom output folder ex: " + Colors.Color.GREEN + "'--output /home/test/Desktop'"  + Colors.Color.ORANGE + "  |")
-        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--ext_d:" + Colors.Color.WHITE + " List Files of an external directory ex: " + Colors.Color.GREEN + "'list --ext_d /home/test/Desktop'" + Colors.Color.ORANGE + " |")
-        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--folder_name:" + Colors.Color.WHITE + " Change the name of the output directory ex: " + Colors.Color.GREEN + "'--folder_name Test'" + Colors.Color.ORANGE + "    |")
-        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--advanced:" + Colors.Color.WHITE + " Extract advanced information from metadata ex: " + Colors.Color.GREEN +"'test.docx --advanced'" + Colors.Color.ORANGE + "  |")
-        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--verbose:" + Colors.Color.WHITE + " Disable screen output ex: "+ Colors.Color.GREEN + "'test.docx --verbose'"  + Colors.Color.ORANGE + "                         | ")
-        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--noOutput:" + Colors.Color.WHITE + " Disable file output ex: " + Colors.Color.GREEN + "'test.docx --noOutput'" + Colors.Color.ORANGE + "                         |")
-        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--extraction:" + Colors.Color.WHITE + " Extract media from documents ex: " + Colors.Color.GREEN + "'test.docx --extraction'" + Colors.Color.ORANGE + "            |")
-        print(Colors.Color.ORANGE + "-------------------------------------------------------------------------------------")
-    
+        print(Colors.Color.ORANGE + "------------------------------------------------------------------------------------------------")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--internal:" + Colors.Color.WHITE + " Scan files from 'Files' internal folder ex: " + Colors.Color.GREEN + "'test.docx --internal'" + Colors.Color.ORANGE + "                |")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--output:" + Colors.Color.WHITE + " Insert path to a custom output folder ex: " + Colors.Color.GREEN + "'--output /home/test/Desktop'"  + Colors.Color.ORANGE + "             |")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--ext_d:" + Colors.Color.WHITE + " List Files of an external directory ex: " + Colors.Color.GREEN + "'list --ext_d /home/test/Desktop'" + Colors.Color.ORANGE + "            |")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--folder_name:" + Colors.Color.WHITE + " Change the name of the output directory ex: " + Colors.Color.GREEN + "'--folder_name Test'" + Colors.Color.ORANGE + "               |")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--advanced:" + Colors.Color.WHITE + " Extract advanced information from metadata ex: " + Colors.Color.GREEN +"'test.docx --advanced'" + Colors.Color.ORANGE + "             |")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--text:" + Colors.Color.WHITE + " Extract file text-content from document ex: " + Colors.Color.GREEN +"'test.docx --text'" + Colors.Color.ORANGE + "                        |")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--search:" + Colors.Color.WHITE + " Search for a specific keyword in the document ex: "+ Colors.Color.GREEN + "'test.docx --text --search test'"  + Colors.Color.ORANGE + "  |")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--verbose:" + Colors.Color.WHITE + " Disable screen output ex: "+ Colors.Color.GREEN + "'test.docx --verbose'"  + Colors.Color.ORANGE + "                                    | ")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--noOutput:" + Colors.Color.WHITE + " Disable file output ex: " + Colors.Color.GREEN + "'test.docx --noOutput'" + Colors.Color.ORANGE + "                                    |")
+        print(Colors.Color.ORANGE + "|" + Colors.Color.GREEN + "--extraction:" + Colors.Color.WHITE + " Extract media from documents ex: " + Colors.Color.GREEN + "'test.docx --extraction'" + Colors.Color.ORANGE + "                       |")
+        print(Colors.Color.ORANGE + "------------------------------------------------------------------------------------------------")
+
     @staticmethod
     def Static():
         Banner.GET_BANNER.Banner(1)
@@ -61,6 +63,11 @@ class MAIN:
                     extr = 1
                 else:
                     extr = 0
+                if " --text" in string or "--text" in string:
+                    string = string.replace(" --text","--text").replace("--text","")
+                    txt_ext = 1
+                else:
+                    txt_ext = 0
                 if " --noOutput" in string or "--noOutput" in string:
                     string = string.replace(" --noOutput","--noOutput").replace("--noOutput","")
                     out = 0
@@ -85,4 +92,11 @@ class MAIN:
                     int_f = 1
                 else:
                     int_f = 0
-                Start.MAIN.GET_DATA(string.lstrip().rstrip(),adv,vrb,out,extr,folder,int_f,folder_n)
+                if " --search" in string or "--search" in string:
+                    string = string.replace(" --search","--search")
+                    term = string.split("--search",1)[1].split(" ",1)[1].split(" ",1)[0]
+                    string = string.replace(" --search","--search").replace("--search","")
+                    string = string.rsplit("{}".format(term),1)[0]
+                else:
+                    term = ""
+                Start.MAIN.GET_DATA(string.lstrip().rstrip(),adv,vrb,out,extr,folder,int_f,folder_n,txt_ext,term.replace("_",""))
