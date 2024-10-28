@@ -68,4 +68,3 @@ class GET_HASHES:
             print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Sha512-Hash: {}".format(Colors.Color.GREEN + sha512))
         else:
             print(Colors.Color.BLUE + "[I]" + Colors.Color.WHITE + "Process completed")
-        return md5,sha256,sha512
