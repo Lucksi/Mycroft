@@ -74,13 +74,17 @@ python3 main.py
 | Get file hashes  | All formats |
 | Get local informations  | All formats |
 | Extract and Download media  | docx, pptx, odp, odt |
-| Extract Text  | docx, pptx, odt |
-| Search Keyword  | docx, pptx, odt |
+| Extract Text  | docx, pptx, odt, odp|
+| Search Keyword  | docx, pptx, odt, odp|
 | Extract files  | zip, apk, jar |
 | Get archives file information  | zip, apk, jar |
 | Get archive information  | zip, apk, jar |
 | Recognize archive Compression Type  | zip, apk, jar |
+| Recognize Password Protection  | zip, apk, jar|
+| Recognize Shared File  | docx, pptx, xlsx |
 | Recognize Suspicious keywords  | pdf |
+| Recognize Encryption Algorithm  | pdf |
+| Recognize Pdf File Permission  | pdf |
 
 ## File Hashing formats:
 

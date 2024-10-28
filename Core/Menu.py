@@ -31,7 +31,7 @@ class MAIN:
         while True:
             string = str(input(Colors.Color.GREEN + "\n[+]" + Colors.Color.WHITE + "Insert file name\n\n" + Colors.Color.ORANGE + "[Mycroft]" + Colors.Color.WHITE + "-->"))
             while string == "" or string == " ":
-                string = str(input(Colors.Color.WHITE + "\nInsert file name\n\n" + Colors.Color.ORANGE + "[Mycroft]" + Colors.Color.WHITE + "-->"))
+                string = str(input(Colors.Color.GREEN + "[+]" + Colors.Color.WHITE + "\nInsert file name\n\n" + Colors.Color.ORANGE + "[Mycroft]" + Colors.Color.WHITE + "-->"))
             if string == "clear" or string == "Clear":
                 Banner.GET_BANNER.Banner(1)
             elif "list" in string or "List" in string:
@@ -94,9 +94,9 @@ class MAIN:
                     int_f = 0
                 if " --search" in string or "--search" in string:
                     string = string.replace(" --search","--search")
-                    term = string.split("--search",1)[1].split(" ",1)[1].split(" ",1)[0]
+                    term = string.split("--search",1)[1].split(" ",1)[1] + "separator_char".split("separator_char",1)[0]
                     string = string.replace(" --search","--search").replace("--search","")
                     string = string.rsplit("{}".format(term),1)[0]
                 else:
                     term = ""
-                Start.MAIN.GET_DATA(string.lstrip().rstrip(),adv,vrb,out,extr,folder,int_f,folder_n,txt_ext,term.replace("_",""))
+                Start.MAIN.GET_DATA(string.lstrip().rstrip(),adv,vrb,out,extr,folder,int_f,folder_n,txt_ext,term)

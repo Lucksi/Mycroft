@@ -6,7 +6,7 @@
 class FILE:
 
     @staticmethod
-    def MIC_Format(file_list,extension,extr,myFile,out3,images_s,type_images,out2,media_s,type_media):
+    def MIC_Format(file_list,extension,extr,File_m,out3,images_s,type_images,out2,media_s,type_media):
         for element in file_list:
             if extension == "doc" or extension == "docx":
                 check_string = "word/media/image"
@@ -18,7 +18,7 @@ class FILE:
                 check_fol = "ppt/media/"
             if check_string in element:
                 if extr == 1:
-                    ls = myFile.read(element)
+                    ls = File_m.read(element)
                     file_im = out3 + "/" +  element.replace(check_fol,"")
                     f = open(file_im,"wb")
                     f.write(ls)
@@ -27,7 +27,7 @@ class FILE:
                 type_images.append("Image")
             elif check_string2 in element:
                 if extr == 1:
-                    ls = myFile.read(element)
+                    ls = File_m.read(element)
                     file_im = out2 + "/" +  element.replace(check_fol,"")
                     f = open(file_im,"wb")
                     f.write(ls)
@@ -38,13 +38,13 @@ class FILE:
                 pass
     
     @staticmethod
-    def LIB_Format(document3,extr,myFile,out3,images_s,type_images,out2,media_s,type_media):
+    def LIB_Format(document3,extr,File_m,out3,images_s,type_images,out2,media_s,type_media):
         for elements in document3:
             element = elements.get("{urn:oasis:names:tc:opendocument:xmlns:manifest:1.0}full-path")
             type = elements.get("{urn:oasis:names:tc:opendocument:xmlns:manifest:1.0}media-type")
             if "image" in type:
                 if extr == 1:
-                    ls = myFile.read(element)
+                    ls = File_m.read(element)
                     file_im = out3 + "/" +  element.replace("Pictures/","").replace("Thumbnails/","")
                     f = open(file_im,"wb")
                     f.write(ls)
@@ -53,7 +53,7 @@ class FILE:
                 type_images.append(type)
             elif "Media" in element:
                 if extr == 1:
-                    ls = myFile.read(element)
+                    ls = File_m.read(element)
                     file_im = out2 + "/" +  element.replace("Media/","")
                     f = open(file_im,"wb")
                     f.write(ls)

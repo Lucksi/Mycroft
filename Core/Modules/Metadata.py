@@ -11,6 +11,8 @@ from Core.Modules.Images import Dimension
 from Core.Modules.Media import Extraction
 from Core.Modules.Archives import Properties
 from Core.Modules.Documents import Content
+from Core.Modules.Documents import Permissions
+from Core.Modules import Position
 from Core.Modules import Finder
 from time import sleep
 import zipfile
@@ -55,7 +57,11 @@ class DOCUMENTS:
             instId = "None"
             layout = "None"
             metadata_d = "None"
+            doc_ch = "None"
             key = "None"
+            encrypted = "False"
+            pw_protected = "None"
+            version = "None"
             annotation = []
             link = []
             heights = []
@@ -72,6 +78,7 @@ class DOCUMENTS:
             height2 = []
             width2 = []
             suspect_keys = []
+            permissions_l = []
             company = "None"
             sour_mod = "None"
             i = 0
@@ -83,6 +90,10 @@ class DOCUMENTS:
                     continue
                 if b"%PDF" in line:
                     pdf_version = line.split(b"%PDF-",-1)[1].decode('latin-1').split("/",1)[0].replace(" ","").replace("%âãÏÓ","")
+                if b"/Count" in line or b"/Count " in line:
+                    pages = Decoder.EXTRACTOR.EXIF_Metadata("/Count","/Count ",i,max1,1,1,False,"",line,2,"")
+                if b"/PageLayout/" in line or b"/PageLayout/ " in line:
+                    layout = Decoder.EXTRACTOR.EXIF_Metadata("/PageLayout/","/PageLayout/  ",i,max1,1,1,False,"",line,2,"")
                 if b"/OpenAction" in line or b"/OpenAction " in line:
                     key2 = "OpenAction"
                     suspect_keys.append(key2)
@@ -108,9 +119,36 @@ class DOCUMENTS:
                     Decoder.EXTRACTOR.EXIF_Metadata("/S /URI /URI","/URI ",i,max1,1,1,True,link,line,1,"")
                     key2 = "URI"
                     suspect_keys.append(key2)
+                if b"/DocChecksum /" in line or b"/DocChecksum / " in line:
+                    doc_ch = Decoder.EXTRACTOR.EXIF_Metadata("/DocChecksum /","/DocChecksum / ",i,max1,1,1,False,"",line,1,"")
+                if b"/Encrypt" in line or b"/Encrypt " in line:
+                    line_index = Decoder.EXTRACTOR.EXIF_Metadata("/Encrypt","/Encrypt ",i,max1,1,1,False,"",line,1,"")
+                    index =  Position.FINDER.ENCRYPTION_PDF(line_index,max1)
+                    encrypted = "True"
+                    line = max1[index]
+                    if b"/Filter/" in line or b"/Filter/ " in line:
+                        algo = Decoder.EXTRACTOR.EXIF_Metadata("/Filter/","/Filter/ ",i,max1,1,1,False,"",line,1,"")
+                    else:
+                        algo = ""
+                    if b"/V" in line or b"/V " in line:
+                        version = Decoder.EXTRACTOR.EXIF_Metadata("/V","/V ",i,max1,1,1,False,"",line,1,"")
+                    else:
+                        version = ""
+                    if b"/Length" in line or b"/Length " in line:
+                        bit_length = Decoder.EXTRACTOR.EXIF_Metadata("/Length","/Length ",i,max1,1,1,False,"",line,1,"") + " Bits"
+                    else:
+                        bit_length = ""
+                    if b"/R" in line or "/R " in line:
+                        revision_b = Decoder.EXTRACTOR.EXIF_Metadata("/R","/R ",i,max1,1,1,False,"",line,1,"")
+                    if b"/P" in line or b"/P " in line:
+                        permsission_num = Decoder.EXTRACTOR.EXIF_Metadata("/P","/P ",i,max1,1,1,False,"",line,7,">>").replace("\n","")
+                        Permissions.GET_PERMISSIONS.PDF.GET(permsission_num,revision_b,permissions_l)
+                    version = algo + version + ".{} ({})".format(revision_b.replace(" ",""),bit_length.lstrip())
                 if adobe == "False":
                     if b"/Title" in line or b"/Title " in line:
                         title = Decoder.EXTRACTOR.EXIF_Metadata("/Title","/Title ",i,max1,1,1,False,"",line,1,"")
+                    if b"/Author" in line or b"/Author " in line:
+                        author = Decoder.EXTRACTOR.EXIF_Metadata("/Author","/Author ",i,max1,1,1,False,"",line,1,"")
                     if b"/Lang" in line or b"/Lang " in line:
                         lang = Decoder.EXTRACTOR.EXIF_Metadata("/Lang","/Lang ",i,max1,1,1,False,"",line,1,"")
                     if b"/Producer" in line or b"/Producer " in line:
@@ -127,33 +165,30 @@ class DOCUMENTS:
                         Decoder.EXTRACTOR.EXIF_Metadata("/Subtype/","/Subtype/ ",i,max1,1,1,True,type,line,1,"")
                     if b"/CreationDate" in line or b"/CreationDate " in line:
                         creation = Decoder.EXTRACTOR.EXIF_Metadata("/CreationDate","/CreationDate ",i,max1,1,1,False,"",line,3,"")
-                    if b"/ModDate" in line or b"/ModDate " in line:
-                        mod_date = Decoder.EXTRACTOR.EXIF_Metadata("/ModDate","/ModDate ",i,max1,1,1,False,"",line,3,"")
-                    if b"/Count" in line or b"/Count " in line:
-                        pages = Decoder.EXTRACTOR.EXIF_Metadata("/Count","/Count ",i,max1,1,1,False,"",line,2,"")
                     if b"/Keywords" in line or b"/Keywords " in line:
                         key = Decoder.EXTRACTOR.EXIF_Metadata("/Keywords","/Keywords ",i,max1,1,1,False,"",line,3,"")
-                    if b"/Author" in line or b"/Author " in line:
-                        author = Decoder.EXTRACTOR.EXIF_Metadata("/Author","/Author ",i,max1,1,1,False,"",line,1,"")
+                    if b"/ModDate" in line or b"/ModDate " in line:
+                        mod_date = Decoder.EXTRACTOR.EXIF_Metadata("/ModDate","/ModDate ",i,max1,1,1,False,"",line,3,"")
                     if b"/Company" in line or b"/Company " in line:
                         author = Decoder.EXTRACTOR.EXIF_Metadata("/Company","/Company ",i,max1,1,1,False,"",line,1,"")
                 else:
-                    if b"/Author" in line or b"/Author " in line:
-                        author = Decoder.EXTRACTOR.EXIF_Metadata("/Author","/Author ",i,max1,1,1,False,"",line,1,"")
-                    if b"/Title" in line or b"/Title " in line:
-                        title = Decoder.EXTRACTOR.EXIF_Metadata("/Title","/Title ",i,max1,1,1,False,"",line,1,"")
                     if b"<pdf:Producer>" in line or b"<pdf:Producer> " in line:
                         creator = Decoder.EXTRACTOR.EXIF_Metadata("<pdf:Producer>","<pdf:Producer> ",i,max1,1,1,False,"",line,6,"")
                         if "</rdf:Description>" in creator or "</rdf:Description>\n" in creator:
                             creator = creator.replace("</rdf:Description>","")
                     if b"<xmp:CreateDate>" in line or b"<xmp:CreateDate> " in line:
                         creation = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:CreateDate>","<xmp:CreateDate> ",i,max1,1,1,False,"",line,5,"")
-                    if b"<xmp:ModifyDate>" in line or b"/ModDate " in line:
+                    if b"<xmp:ModifyDate>" in line or b"<xmp:ModifyDate> " in line:
                         mod_date = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:ModifyDate>","<xmp:ModifyDate> ",i,max1,1,1,False,"",line,5,"")
-                    if b"/Count" in line or b"/Count " in line:
-                        pages = Decoder.EXTRACTOR.EXIF_Metadata("/Count","/Count ",i,max1,1,1,False,"",line,2,"")
-                    if b"/PageLayout/" in line or b"/PageLayout/ " in line:
-                        layout = Decoder.EXTRACTOR.EXIF_Metadata("/PageLayout/","/PageLayout/  ",i,max1,1,1,False,"",line,2,"")
+                    if b"<pdf:Keywords>" in line or b"<pdf:Keywords> " in line:
+                        key = Decoder.EXTRACTOR.EXIF_Metadata("<pdf:Keywords>","<pdf:Keywords> ",i,max1,1,1,False,"",line,5,"")
+                    if b'<dc:title><rdf:Alt><rdf:li xml:lang="x-default">' in line or b"<dc:title>\n" in line:
+                        if b"<dc:title>\n" in line:
+                            line = max1[i + 2]
+                            title = line.split(b'<rdf:li xml:lang="x-default">',1)[1].decode('latin-1').replace('</rdf:li>', "").replace("<","")
+                            line = max1[i - 2]
+                        else:
+                            title = line.split(b'<dc:title><rdf:Alt><rdf:li xml:lang="x-default">',1)[1].decode('latin-1').split("/",1)[0].replace("<","")
                     if b"<dc:creator><rdf:Seq><rdf:li>" in line or b"<dc:creator>\n" in line:
                         if b"<dc:creator>\n" in line:
                             line = max1[i + 2]
@@ -223,16 +258,25 @@ class DOCUMENTS:
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Title: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(title))
                 if pdf_version != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Version: " + Colors.Color.GREEN +  Formatting.TEXT.FORMATTED(pdf_version))
+                print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Encrypted: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(encrypted))
+                if encrypted != "False":
+                    if version != "None":
+                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Encryption: " + Colors.Color.GREEN + version)
+                if pw_protected != "None":
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Password-Protected: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(pw_protected))
                 if tool != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creator-Tool: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(tool))
                 if metadata_d != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Metadata-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(metadata_d))
                 if creator != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Creator: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creator))
-                if creation != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Creation-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creation))
-                if mod_date != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Modification-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(mod_date))
+                if encrypted == "False":
+                    if creation != "None":
+                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Creation-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creation))
+                    if mod_date != "None":
+                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Modification-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(mod_date))
+                if len(permissions_l):
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Permissions: " + Colors.Color.GREEN + str(permissions_l).replace("[","").replace("]",""))
                 if docId != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Document-Id: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(docId))
                 if instId != "None":
@@ -243,14 +287,17 @@ class DOCUMENTS:
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Keywords: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(key))
                 if pages != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pages: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(pages))
-                if lang != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Language: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(lang))
+                if encrypted == "False":
+                    if lang != "None":
+                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Language: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(lang))
                 if author != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Author: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(author))
                 if company != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Company: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(company))
                 if sour_mod != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Source-Modified: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(sour_mod))
+                if doc_ch != "None":
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Document-Checksum: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(doc_ch))
                 if adv == 1:
                     if len(link):
                         i = 1
@@ -413,6 +460,7 @@ class DOCUMENTS:
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(author),f,"Author: ")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(company),f,"Company: ")
                 Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(sour_mod),f,"Source-Modified: ")
+                Write_File.OUTPUT.LINE(Formatting.TEXT.FORMATTED(doc_ch),f,"Document-Checksum: ")
                 f.close()
 
         elif extension == "docx" or extension == "pptx" or extension == "odt" or extension == "odp" or extension == "ods" or extension == "xlsx":
@@ -458,6 +506,8 @@ class DOCUMENTS:
             notes = "None"
             h_slides = "None"
             mmclips = "None"
+            r_only = "False"
+            pw_protected = "None"
             images_s = []
             type_images = []
             media_s = []
@@ -467,11 +517,12 @@ class DOCUMENTS:
             out2 = output.replace("Metadata.txt","Media")
             os.mkdir(out3)
             os.mkdir(out2)
-            myFile = zipfile.ZipFile(origfile,'r')
+            File_m = zipfile.ZipFile(origfile,'r')
             if extension == "odt" or extension == "odp" or extension == "ods":
-                document = xml.dom.minidom.parseString(myFile.read('meta.xml'))
-                document2 = xml.etree.ElementTree.fromstring(myFile.read('META-INF/manifest.xml'))
-                document4 = xml.dom.minidom.parseString(myFile.read('meta.xml')).toprettyxml()
+                document = xml.dom.minidom.parseString(File_m.read('meta.xml'))
+                document2 = xml.etree.ElementTree.fromstring(File_m.read('META-INF/manifest.xml'))
+                document4 = xml.dom.minidom.parseString(File_m.read('meta.xml')).toprettyxml()
+                document5 = xml.dom.minidom.parseString(File_m.read('settings.xml')).toprettyxml()
                 table = Decoder.EXTRACTOR.ODF_Metadata(document4,"table-count="," ")
                 im_count =  Decoder.EXTRACTOR.ODF_Metadata(document4,"image-count="," ")
                 pagesn =  Decoder.EXTRACTOR.ODF_Metadata(document4,"page-count="," ")
@@ -484,14 +535,16 @@ class DOCUMENTS:
                 elif extension == "odt":
                     obj =  Decoder.EXTRACTOR.ODF_Metadata(document4,"object-count="," ")
                 date = Decoder.EXTRACTOR.XML_Metadata(document,"dc:date")
-                revision = Decoder.EXTRACTOR.XML_Metadata(document,"cp:revision")
+                revision = Decoder.EXTRACTOR.XML_Metadata(document,"meta:editing-cycles")
                 revision_t = Decoder.EXTRACTOR.XML_Metadata(document,"meta:editing-duration").replace("D","D-").replace("P","").replace("T","").replace("H","H-").replace("M","M-")
                 creator = Decoder.EXTRACTOR.XML_Metadata(document,"meta:generator")
+                r_only =  Decoder.EXTRACTOR.ODF_Metadata(document5,'<config:config-item config:name="LoadReadonly" config:type="boolean">',"</")
+                pw_protected = Decoder.EXTRACTOR.ODF_Metadata(document5,'<config:config-item config:name="RedlineProtectionKey" config:type="base64Binary">',"</")
                 if adv == 1:
-                    Extraction.FILE.LIB_Format(document2,extr,myFile,out3,images_s,type_images,out2,media_s,type_media)
+                    Extraction.FILE.LIB_Format(document2,extr,File_m,out3,images_s,type_images,out2,media_s,type_media)
             else:
-                document = xml.dom.minidom.parseString(myFile.read('docProps/core.xml'))
-                document2 = xml.dom.minidom.parseString(myFile.read('docProps/app.xml'))
+                document = xml.dom.minidom.parseString(File_m.read('docProps/core.xml'))
+                document2 = xml.dom.minidom.parseString(File_m.read('docProps/app.xml'))
                 title = Decoder.EXTRACTOR.XML_Metadata(document,"dc:title")
                 description = Decoder.EXTRACTOR.XML_Metadata(document,"dc:description")
                 creator = Decoder.EXTRACTOR.XML_Metadata(document,"dc:creator")
@@ -521,8 +574,8 @@ class DOCUMENTS:
                 app_v = Decoder.EXTRACTOR.XML_Metadata(document2,"AppVersion")
                 
                 if adv == 1:
-                    file_list = myFile.namelist()
-                    Extraction.FILE.MIC_Format(file_list,extension,extr,myFile,out3,images_s,type_images,out2,media_s,type_media)
+                    file_list = File_m.namelist()
+                    Extraction.FILE.MIC_Format(file_list,extension,extr,File_m,out3,images_s,type_images,out2,media_s,type_media)
              
             if vrb == 1:
                 print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "File-Name: {}".format(Colors.Color.GREEN + name))
@@ -614,6 +667,12 @@ class DOCUMENTS:
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Characters-With-Space: " + Colors.Color.GREEN + c_space)
                 if app_v != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "App-Version: " + Colors.Color.GREEN + app_v)
+                if r_only != "None":
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Read-Only: " + Colors.Color.GREEN + r_only)
+                if pw_protected != "None":
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Password-Protected: " + Colors.Color.GREEN + "True" + Colors.Color.WHITE + " Encoded-Base64Binary-Password: " + Colors.Color.GREEN +  pw_protected)
+                else:
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Password-Protected: " + Colors.Color.GREEN + "False" )
                 if len(images_s):
                     print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Printing Extracted images")
                     i = 1
@@ -676,17 +735,17 @@ class DOCUMENTS:
                 print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Extracting text from file")
                 output = output.replace("Metadata.txt","Content.txt")
                 if extension == "docx":
-                    document4 = xml.dom.minidom.parseString(myFile.read('word/document.xml'))
+                    document4 = xml.dom.minidom.parseString(File_m.read('word/document.xml'))
                     result = document4.getElementsByTagName("w:t")
                     sleep(3)
                     Content.GET.DOC_TEXT(result,output)
                 elif extension == "odt" or extension == "odp":
-                    document4 = xml.dom.minidom.parseString(myFile.read('content.xml'))
+                    document4 = xml.dom.minidom.parseString(File_m.read('content.xml'))
                     if extension == "odt" or extension == "odp":
                         result = document4.getElementsByTagName("text:span")
                         Content.GET.DOC_TEXT(result,output)
                 elif extension == "pptx":
-                    Content.GET.PPTX_TEXT(myFile,output)
+                    Content.GET.PPTX_TEXT(File_m,output)
                 if term != "":
                     print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Searching for {}".format(Colors.Color.GREEN + term + Colors.Color.WHITE))
                     sleep(3)
@@ -972,11 +1031,11 @@ class DOCUMENTS:
                 if creator != "None":
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creation-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creator))
                 if extid != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Ext-Id: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(extid))
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Ads Ext-Id: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(extid))
                 if fbid != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Fb-Id: " + Colors.Color.GREEN +  Formatting.TEXT.FORMATTED(fbid))
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Ads Fb-Id: " + Colors.Color.GREEN +  Formatting.TEXT.FORMATTED(fbid))
                 if touchtype != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Touchtype: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(touchtype))
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Ads Touchtype: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(touchtype))
             else:
                 print(Colors.Color.BLUE + "[I]" + Colors.Color.WHITE + "Process completed")
             

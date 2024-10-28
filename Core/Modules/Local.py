@@ -38,21 +38,61 @@ class GET_DATA:
         elif filename.endswith(".bat"):
             filetype = "Windows Batch File"
         elif filename.endswith(".doc") or filename.endswith(".docx"):
-            filetype = "Microsoft Document"
+            filetype = "Microsoft Word Document"
+        elif filename.endswith(".pptx"):
+            filetype = "Microsoft PowerPoint Open XML Presentation"
+        elif filename.endswith(".xls") or filename.endswith(".xlsx"):
+            filetype = "Microsoft Excel Spreadsheet"
         elif filename.endswith(".odt"):
-            filetype = "Open Document"
+            filetype = "Open Document Text"
         elif filename.endswith(".odp"):
-            filetype = "Open Presentation"
+            filetype = "Open Document Presentation"
+        elif filename.endswith(".ods"):
+            filetype = "Open Document Spreadsheet"
         elif filename.endswith(".pdf"):
             filetype = "Pdf File"
         elif filename.endswith(".iso"):
-            filetype = "Disk-Image file"
+            filetype = "Disk-Image File"
         elif filename.endswith(".jpg"):
-            filetype = "Image file (JPG)"
+            filetype = "Image/Jpg File (JPG)"
         elif filename.endswith(".jpeg"):
-            filetype = "Image file (JPEG)"
+            filetype = "Image/Jpeg File (JPEG)"
         elif filename.endswith(".png"):
-            filetype = "Image file (PNG)"
+            filetype = "Image/Png File (PNG)"
+        elif filename.endswith(".exe"):
+            filetype = "Windows Executable File"
+        elif filename.endswith(".elf"):
+            filetype = "Linux Executable and Linkable File"
+        elif filename.endswith(".dll"):
+            filetype = "Dynamic-Link Library"
+        elif filename.endswith(".so"):
+            filetype = "Shared Library"
+        elif filename.endswith(".a"):
+            filetype = "Static Library"
+        elif filename.endswith(".zip"):
+            filetype = "Zip Archive"
+        elif filename.endswith(".a"):
+            filetype = "Rar Archive"
+        elif filename.endswith(".jar"):
+            filetype = "Java Archive"
+        elif filename.endswith(".apk"):
+            filetype = "Android Package"
+        elif filename.endswith(".gz"):
+            filetype = "GNU Zip Archive"
+        elif filename.endswith(".tar"):
+            filetype = "Tape File Archive"
+        elif filename.endswith(".rtf"):
+            filetype = "Rich Text Format File"
+        elif filename.endswith(".php"):
+            filetype = "Php File"
+        elif filename.endswith(".uue"):
+            filetype = "Uuencoded File"
+        elif filename.endswith(".ace"):
+            filetype = "A Compact ENDF Archive"
+        elif filename.endswith(".7z"):
+            filetype = "7Zip Archive"
+        elif filename.endswith(".z"):
+            filetype = "Unix Compressed File"
         return filetype
     
     @staticmethod

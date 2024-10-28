@@ -46,6 +46,7 @@ class GET:
     
     @staticmethod
     def PPTX_TEXT(index,output):
+        s_string = 0
         list = index.namelist()
         f = open(output,"w")
         f.write("Getting-Slides")
@@ -61,9 +62,14 @@ class GET:
                     for text in string:
                         content = text.childNodes[0].data
                         f.write(str(content))
+                        s_string = s_string + 1
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Content Stored Successfully")
                 except Exception as e:
-                        print(Colors.Color.RED + "[!]" + Colors.Color.WHITE + "Something Went Wrong: " + Colors.Color.GREEN + str(e) + "\n")
+                    print(Colors.Color.RED + "[!]" + Colors.Color.WHITE + "Something Went Wrong: " + Colors.Color.GREEN + str(e) + "\n")
+                if s_string > 0:
+                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Total Strings saved: " + Colors.Color.GREEN + str(s_string))
+                else:
+                    print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "Total Strings saved: " + Colors.Color.GREEN + str(s_string))
             else:
                 pass
         f.close()
