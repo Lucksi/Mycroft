@@ -79,12 +79,12 @@ python3 main.py
 | Extract files  | zip, apk, jar |
 | Get archives file information  | zip, apk, jar |
 | Get archive information  | zip, apk, jar |
+| Get Pdf File Permission  | pdf |
 | Recognize archive Compression Type  | zip, apk, jar |
 | Recognize Password Protection  | zip, apk, jar|
 | Recognize Shared File  | docx, pptx, xlsx |
 | Recognize Suspicious keywords  | pdf |
 | Recognize Encryption Algorithm  | pdf |
-| Recognize Pdf File Permission  | pdf |
 
 ## File Hashing formats:
 
