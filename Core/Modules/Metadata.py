@@ -405,7 +405,7 @@ class DOCUMENTS:
                         ur = 0
                         for keys in suspect_keys:
                             keys = Formatting.TEXT.FORMATTED(keys).replace(" ","")
-                            if keys == "JavaScript/JS":
+                            if keys == "JavaScriptJS":
                                 js = js + 1
                             elif keys == "OpenAction":
                                 oa = oa + 1
@@ -417,7 +417,7 @@ class DOCUMENTS:
                                 rme = rme + 1
                             elif keys == "ObjectStream":
                                 obm = obm + 1
-                            elif keys == "SubmitForm/GoToR":
+                            elif keys == "SubmitFormGoToR":
                                 gor = gor + 1
                             elif keys == "URI":
                                 ur = ur + 1
