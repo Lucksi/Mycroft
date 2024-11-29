@@ -138,7 +138,7 @@ class DOCUMENTS:
                         bit_length = Decoder.EXTRACTOR.EXIF_Metadata("/Length","/Length ",i,max1,1,1,False,"",line,1,"") + " Bits"
                     else:
                         bit_length = ""
-                    if b"/R" in line or "/R " in line:
+                    if b"/R" in line or b"/R " in line:
                         revision_b = Decoder.EXTRACTOR.EXIF_Metadata("/R","/R ",i,max1,1,1,False,"",line,1,"")
                     if b"/P" in line or b"/P " in line:
                         permsission_num = Decoder.EXTRACTOR.EXIF_Metadata("/P","/P ",i,max1,1,1,False,"",line,7,">>").replace("\n","")
