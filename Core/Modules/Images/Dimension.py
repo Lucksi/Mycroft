@@ -22,7 +22,6 @@ class IMAGE:
         img = open(origfile,"rb")
         reader = img.read()
         img.close()
-        print(reader)
         if extension == "png":
             img = open(origfile,"rb")
             reader = img.read()
