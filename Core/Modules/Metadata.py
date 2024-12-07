@@ -397,7 +397,6 @@ class DOCUMENTS:
                     if len(suspect_keys):
                         print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Suspect Keywords Found")
                         descriptions = ["Execute JavaScript code","Execute a specific action at document opening","External file embedded in the document","Embeed flash in a document","Data hidden in Object Stream","Send External Data","URI can sometimes be malicious","Launch an external application or document"]
-                        severity = ["High","Medium","Low"]
                         js = 0
                         oa = 0
                         aa = 0
@@ -428,7 +427,7 @@ class DOCUMENTS:
                             elif keys == "Launch":
                                 ln = ln + 1
                         if js != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "JavaScript/JS: {} Times Found Description: {} Severity: {}".format(Colors.Color.GREEN + str(js) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[0]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "JavaScript/JS: {} Times Found Description: {}".format(Colors.Color.GREEN + str(js) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[0]))
                         if oa != 0:
                             print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "OpenAction: {} Times Found Description: {}".format(Colors.Color.GREEN + str(oa) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[1]))
                         if aa != 0:
