@@ -93,6 +93,12 @@ class GET_DATA:
             filetype = "7Zip Archive"
         elif filename.endswith(".z"):
             filetype = "Unix Compressed File"
+        elif filename.endswith(".img"):
+            filetype = "Raw Image File"
+        elif filename.endswith(".ppam"):
+            filetype = "PowerPoint Macro-Enabled Add-Ins"
+        elif filename.endswith(".vbs"):
+            filetype = "Visual Basic Script"
         return filetype
     
     @staticmethod
@@ -114,7 +120,7 @@ class GET_DATA:
         return linec,wordsc,charact
     
     @staticmethod
-    def Parameters(name,origfile,vrb,out,output):
+    def Parameters(name,origfile,vrb,out,output):#,f_name):
         print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Getting Local Information...")
         sleep(2)
         lines = GET_DATA.CountLines(origfile)[0]
@@ -161,8 +167,8 @@ class GET_DATA:
             f.write("-----------------------------------------------------------------------------------------------------------------------------------------------------")
             f.write("\nLocal file details:\n\n")
             Write_File.OUTPUT.LINE(name,f,"File-Name: ")
-            Write_File.OUTPUT.LINE(str(size),f,"File-Size: ")
             Write_File.OUTPUT.LINE(origfile,f,"File-Location: ")
+            Write_File.OUTPUT.LINE(str(size),f,"File-Size: ")
             if filetype != "":
                 Write_File.OUTPUT.LINE(filetype,f,"File-Type: ")
             Write_File.OUTPUT.LINE(extension,f,"Extension: ")

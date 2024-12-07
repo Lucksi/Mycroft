@@ -6,7 +6,7 @@
 class EXTRACTOR:
 
     @staticmethod
-    def EXIF_Metadata(Param1,Param2,i,max1,index,position,islist,list,line,style,ext_ch):
+    def GET_Metadata(Param1,Param2,i,max1,index,position,islist,list,line,style,ext_ch):
         parameter = "None"
         try:
             Param1 = Param1.encode()
@@ -15,44 +15,88 @@ class EXTRACTOR:
             Param1_n = Param1_n.encode()
             if Param1 in line or Param2 in line:
                 if Param1_n in line:
-                    line = max1[i + index]
+                    try:
+                        line = max1[i + index]
+                    except Exception as e:
+                        pass
                     if style == 3:
-                        parameter = line.split(b"/",1)[0].decode('latin-1').replace("D:","").split("'",1)[0]
+                        try:
+                            parameter = line.split(b"/",1)[0].decode('latin-1').replace("D:","").split("'",1)[0]
+                        except Exception as e:
+                            pass
                     else:
-                        parameter = line.split(b"/",1)[0].decode('latin-1')
+                        try:
+                            parameter = line.split(b"/",1)[0].decode('latin-1')
+                        except Exception as e:
+                            pass
                     line = max1[i - index]
                 else:
                     if style == 1:
-                        parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0]
+                        try:
+                            parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0]
+                        except Exception as e:
+                            pass
                     elif style == 2:
-                        parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0].replace(" ","")
+                        try:
+                            parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0].replace(" ","")
+                        except Exception as e:
+                            pass
                     elif style == 3:
-                        parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0].replace(" ","").replace("D:","").split("'",1)[0]
+                        try:
+                            parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0].replace(" ","").replace("D:","").split("'",1)[0]
+                        except Exception as e:
+                            pass
                     elif style == 4:
-                        parameter = line.split(Param1,1)[position].decode('latin-1').replace(str(Param1), "")
+                        try:
+                            parameter = line.split(Param1,1)[position].decode('latin-1').replace(str(Param1), "")
+                        except Exception as e:
+                            pass
                     elif style == 5:
-                        parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0].replace(str(Param1), "").replace("<","").replace("T"," ")
+                        try:
+                            parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0].replace(str(Param1), "").replace("<","").replace("T"," ")
+                        except Exception as e:
+                            pass
                     elif style == 6:
-                        parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0].replace(str(Param1), "").replace("<","")
+                        try:
+                            parameter = line.split(Param1,1)[position].decode('latin-1').split("/",1)[0].replace(str(Param1), "").replace("<","")
+                        except Exception as e:
+                            pass
                     elif style == 7:
-                        parameter = line.split(Param1,1)[position].decode('latin-1').replace(ext_ch,"")
+                        try:
+                            parameter = line.split(Param1,1)[position].decode('latin-1').replace(ext_ch,"")
+                        except Exception as e:
+                            pass
                     elif style == 8:
                         if ext_ch.encode() in line:
                             ext_ch_2 = ext_ch + "\n"
                             if ext_ch_2.encode() in line:
                                 ext_ch = ext_ch + "\n"
-                                parameter = line.split(Param1,1)[position].decode('latin-1').split(ext_ch_2 ,1)[0]
+                                try:
+                                    parameter = line.split(Param1,1)[position].decode('latin-1').split(ext_ch_2 ,1)[0]
+                                except Exception as e:
+                                    pass
                             else:
-                                parameter = line.split(Param1,1)[position].decode('latin-1').split(ext_ch ,1)[0]
+                                try:
+                                    parameter = line.split(Param1,1)[position].decode('latin-1').split(ext_ch ,1)[0]
+                                except Exception as e:
+                                    pass
                         else:
-                            parameter = line.split(Param1,1)[position].decode('latin-1').split("' " ,1)[0]
+                            try:
+                                parameter = line.split(Param1,1)[position].decode('latin-1').split("' " ,1)[0]
+                            except Exception as e:
+                                pass
+                    elif style == 9:
+                        try:
+                            parameter = line.split(Param1,1)[position].decode('latin-1')
+                        except Exception as e:
+                            pass
             if islist:  
                 if parameter in list and list == "link" and list == "annotation":
                     pass
                 else:
                     list.append(parameter)
         except:
-            pass
+            parameter = "None"
         return parameter
     
     @staticmethod

@@ -11,6 +11,11 @@ class TEXT:
         return string
     
     @staticmethod
+    def FORMATTED_URL(string):
+        string = string.replace(">>","").replace("\n","").replace("(","").replace(")","").replace(">","").replace("<","").replace('"',"").lstrip().rstrip()
+        return string
+    
+    @staticmethod
     def FORMATTED_EV(string):
         string = string.replace(">>","").replace("\n","").replace("(","").replace(")","").replace(">","").replace("<","").replace('"',"").lstrip().rstrip()
         return string

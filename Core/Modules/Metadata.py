@@ -6,6 +6,7 @@
 from Core.Utils import Colors
 from Core.Utils import Formatting
 from Core.Utils import Write_File
+from Core.Utils import Printer
 from Core.Modules import Reader as Decoder
 from Core.Modules.Images import Dimension
 from Core.Modules.Media import Extraction
@@ -91,16 +92,22 @@ class DOCUMENTS:
                 if b"%PDF" in line:
                     pdf_version = line.split(b"%PDF-",-1)[1].decode('latin-1').split("/",1)[0].replace(" ","").replace("%âãÏÓ","")
                 if b"/Count" in line or b"/Count " in line:
-                    pages = Decoder.EXTRACTOR.EXIF_Metadata("/Count","/Count ",i,max1,1,1,False,"",line,2,"")
+                    pages = Decoder.EXTRACTOR.GET_Metadata("/Count","/Count ",i,max1,1,1,False,"",line,2,"")
                 if b"/PageLayout/" in line or b"/PageLayout/ " in line:
-                    layout = Decoder.EXTRACTOR.EXIF_Metadata("/PageLayout/","/PageLayout/  ",i,max1,1,1,False,"",line,2,"")
+                    layout = Decoder.EXTRACTOR.GET_Metadata("/PageLayout/","/PageLayout/  ",i,max1,1,1,False,"",line,2,"")
                 if b"/OpenAction" in line or b"/OpenAction " in line:
                     key2 = "OpenAction"
                     suspect_keys.append(key2)
                 if b"/AA " in line:
                     key2 = "/AA"
                     suspect_keys.append(key2)
-                if b"/JavaScript" in line or b"/JavaScript " in line or b"/JS" in line or b"/JS " in line:
+                if b"/JavaScript" in line or b"/JavaScript " in line:
+                    key2 = "JavaScript/JS"
+                    suspect_keys.append(key2)
+                if b"/Launch" in line or b"/Launch " in line:
+                    key2 = "Launch"
+                    suspect_keys.append(key2)
+                if b"/JS" in line or b"/JS " in line:
                     key2 = "JavaScript/JS"
                     suspect_keys.append(key2)
                 if b"/RichMedia" in line or b"/RichMedia " in line:
@@ -116,96 +123,110 @@ class DOCUMENTS:
                     key2 = "SubmitForm/GoToR"
                     suspect_keys.append(key2)
                 if b"/S /URI /URI" in line or b"/URI " in line:
-                    Decoder.EXTRACTOR.EXIF_Metadata("/S /URI /URI","/URI ",i,max1,1,1,True,link,line,1,"")
+                    if b"/S /URI /URI" in line:
+                        Decoder.EXTRACTOR.GET_Metadata("/S /URI /URI","/URI ",i,max1,1,1,True,link,line,9,"")
+                    elif b"/URI " in line:
+                        Decoder.EXTRACTOR.GET_Metadata("/URI ","/URI ",i,max1,1,1,True,link,line,9,"")
                     key2 = "URI"
                     suspect_keys.append(key2)
                 if b"/DocChecksum /" in line or b"/DocChecksum / " in line:
-                    doc_ch = Decoder.EXTRACTOR.EXIF_Metadata("/DocChecksum /","/DocChecksum / ",i,max1,1,1,False,"",line,1,"")
+                    doc_ch = Decoder.EXTRACTOR.GET_Metadata("/DocChecksum /","/DocChecksum / ",i,max1,1,1,False,"",line,1,"")
                 if b"/Encrypt" in line or b"/Encrypt " in line:
-                    line_index = Decoder.EXTRACTOR.EXIF_Metadata("/Encrypt","/Encrypt ",i,max1,1,1,False,"",line,1,"")
+                    line_index = Decoder.EXTRACTOR.GET_Metadata("/Encrypt","/Encrypt ",i,max1,1,1,False,"",line,1,"")
                     index =  Position.FINDER.ENCRYPTION_PDF(line_index,max1)
                     encrypted = "True"
                     line = max1[index]
                     if b"/Filter/" in line or b"/Filter/ " in line:
-                        algo = Decoder.EXTRACTOR.EXIF_Metadata("/Filter/","/Filter/ ",i,max1,1,1,False,"",line,1,"")
+                        algo = Decoder.EXTRACTOR.GET_Metadata("/Filter/","/Filter/ ",i,max1,1,1,False,"",line,1,"")
                     else:
                         algo = ""
                     if b"/V" in line or b"/V " in line:
-                        version = Decoder.EXTRACTOR.EXIF_Metadata("/V","/V ",i,max1,1,1,False,"",line,1,"")
+                        version = Decoder.EXTRACTOR.GET_Metadata("/V","/V ",i,max1,1,1,False,"",line,1,"")
                     else:
                         version = ""
                     if b"/Length" in line or b"/Length " in line:
-                        bit_length = Decoder.EXTRACTOR.EXIF_Metadata("/Length","/Length ",i,max1,1,1,False,"",line,1,"") + " Bits"
+                        bit_length = Decoder.EXTRACTOR.GET_Metadata("/Length","/Length ",i,max1,1,1,False,"",line,1,"") + " Bits"
                     else:
                         bit_length = ""
                     if b"/R" in line or b"/R " in line:
-                        revision_b = Decoder.EXTRACTOR.EXIF_Metadata("/R","/R ",i,max1,1,1,False,"",line,1,"")
+                        revision_b = Decoder.EXTRACTOR.GET_Metadata("/R","/R ",i,max1,1,1,False,"",line,1,"")
+                    else:
+                        revision_b = ""
                     if b"/P" in line or b"/P " in line:
-                        permsission_num = Decoder.EXTRACTOR.EXIF_Metadata("/P","/P ",i,max1,1,1,False,"",line,7,">>").replace("\n","")
+                        permsission_num = Decoder.EXTRACTOR.GET_Metadata("/P","/P ",i,max1,1,1,False,"",line,7,">>").replace("\n","")
                         Permissions.GET_PERMISSIONS.PDF.GET(permsission_num,revision_b,permissions_l)
-                    version = algo + version + ".{} ({})".format(revision_b.replace(" ",""),bit_length.lstrip())
+                    try:
+                        version = algo + version + ".{} ({})".format(revision_b.replace(" ",""),bit_length.lstrip())
+                    except Exception as e:
+                        version = "Undefined"
                 if adobe == "False":
                     if b"/Title" in line or b"/Title " in line:
-                        title = Decoder.EXTRACTOR.EXIF_Metadata("/Title","/Title ",i,max1,1,1,False,"",line,1,"")
+                        title = Decoder.EXTRACTOR.GET_Metadata("/Title","/Title ",i,max1,1,1,False,"",line,1,"")
                     if b"/Author" in line or b"/Author " in line:
-                        author = Decoder.EXTRACTOR.EXIF_Metadata("/Author","/Author ",i,max1,1,1,False,"",line,1,"")
+                        author = Decoder.EXTRACTOR.GET_Metadata("/Author","/Author ",i,max1,1,1,False,"",line,1,"")
                     if b"/Lang" in line or b"/Lang " in line:
-                        lang = Decoder.EXTRACTOR.EXIF_Metadata("/Lang","/Lang ",i,max1,1,1,False,"",line,1,"")
+                        lang = Decoder.EXTRACTOR.GET_Metadata("/Lang","/Lang ",i,max1,1,1,False,"",line,1,"")
                     if b"/Producer" in line or b"/Producer " in line:
-                        creator = Decoder.EXTRACTOR.EXIF_Metadata("/Producer","/Producer ",i,max1,1,1,False,"",line,7,"")
+                        creator = Decoder.EXTRACTOR.GET_Metadata("/Producer","/Producer ",i,max1,1,1,False,"",line,7,"")
                     if b"/Annot /T" in line or b"/Annot /T " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("/Annot /T","/Annot /T ",i,max1,1,1,True,annotation,line,1,"")
+                        Decoder.EXTRACTOR.GET_Metadata("/Annot /T","/Annot /T ",i,max1,1,1,True,annotation,line,1,"")
                     if b"/Subtype /" in line or b"/Subtype / " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("/Subtype /","/Subtype / ",i,max1,1,1,True,type,line,1,"")
+                        Decoder.EXTRACTOR.GET_Metadata("/Subtype /","/Subtype / ",i,max1,1,1,True,type,line,1,"")
                     if b"/Height" in line or b"/Height " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("/Height","/Height ",i,max1,1,1,True,heights,line,1,"")
+                        Decoder.EXTRACTOR.GET_Metadata("/Height","/Height ",i,max1,1,1,True,heights,line,1,"")
                     if b"/Width" in line or b"/Width " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("/Width","/Width",i,max1,1,1,True,widths,line,1,"")
+                        Decoder.EXTRACTOR.GET_Metadata("/Width","/Width",i,max1,1,1,True,widths,line,1,"")
                     if b"/Subtype/" in line or b"/Subtype/ " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("/Subtype/","/Subtype/ ",i,max1,1,1,True,type,line,1,"")
+                        Decoder.EXTRACTOR.GET_Metadata("/Subtype/","/Subtype/ ",i,max1,1,1,True,type,line,1,"")
                     if b"/CreationDate" in line or b"/CreationDate " in line:
-                        creation = Decoder.EXTRACTOR.EXIF_Metadata("/CreationDate","/CreationDate ",i,max1,1,1,False,"",line,3,"")
+                        creation = Decoder.EXTRACTOR.GET_Metadata("/CreationDate","/CreationDate ",i,max1,1,1,False,"",line,3,"")
                     if b"/Keywords" in line or b"/Keywords " in line:
-                        key = Decoder.EXTRACTOR.EXIF_Metadata("/Keywords","/Keywords ",i,max1,1,1,False,"",line,3,"")
+                        key = Decoder.EXTRACTOR.GET_Metadata("/Keywords","/Keywords ",i,max1,1,1,False,"",line,3,"")
                     if b"/ModDate" in line or b"/ModDate " in line:
-                        mod_date = Decoder.EXTRACTOR.EXIF_Metadata("/ModDate","/ModDate ",i,max1,1,1,False,"",line,3,"")
+                        mod_date = Decoder.EXTRACTOR.GET_Metadata("/ModDate","/ModDate ",i,max1,1,1,False,"",line,3,"")
                     if b"/Company" in line or b"/Company " in line:
-                        author = Decoder.EXTRACTOR.EXIF_Metadata("/Company","/Company ",i,max1,1,1,False,"",line,1,"")
+                        author = Decoder.EXTRACTOR.GET_Metadata("/Company","/Company ",i,max1,1,1,False,"",line,1,"")
                 else:
                     if b"<pdf:Producer>" in line or b"<pdf:Producer> " in line:
-                        creator = Decoder.EXTRACTOR.EXIF_Metadata("<pdf:Producer>","<pdf:Producer> ",i,max1,1,1,False,"",line,6,"")
+                        creator = Decoder.EXTRACTOR.GET_Metadata("<pdf:Producer>","<pdf:Producer> ",i,max1,1,1,False,"",line,6,"")
                         if "</rdf:Description>" in creator or "</rdf:Description>\n" in creator:
                             creator = creator.replace("</rdf:Description>","")
                     if b"<xmp:CreateDate>" in line or b"<xmp:CreateDate> " in line:
-                        creation = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:CreateDate>","<xmp:CreateDate> ",i,max1,1,1,False,"",line,5,"")
+                        creation = Decoder.EXTRACTOR.GET_Metadata("<xmp:CreateDate>","<xmp:CreateDate> ",i,max1,1,1,False,"",line,5,"")
                     if b"<xmp:ModifyDate>" in line or b"<xmp:ModifyDate> " in line:
-                        mod_date = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:ModifyDate>","<xmp:ModifyDate> ",i,max1,1,1,False,"",line,5,"")
+                        mod_date = Decoder.EXTRACTOR.GET_Metadata("<xmp:ModifyDate>","<xmp:ModifyDate> ",i,max1,1,1,False,"",line,5,"")
                     if b"<pdf:Keywords>" in line or b"<pdf:Keywords> " in line:
-                        key = Decoder.EXTRACTOR.EXIF_Metadata("<pdf:Keywords>","<pdf:Keywords> ",i,max1,1,1,False,"",line,5,"")
+                        key = Decoder.EXTRACTOR.GET_Metadata("<pdf:Keywords>","<pdf:Keywords> ",i,max1,1,1,False,"",line,5,"")
                     if b'<dc:title><rdf:Alt><rdf:li xml:lang="x-default">' in line or b"<dc:title>\n" in line:
                         if b"<dc:title>\n" in line:
                             line = max1[i + 2]
-                            title = line.split(b'<rdf:li xml:lang="x-default">',1)[1].decode('latin-1').replace('</rdf:li>', "").replace("<","")
+                            try:
+                                title = line.split(b'<rdf:li xml:lang="x-default">',1)[1].decode('latin-1').replace('</rdf:li>', "").replace("<","")
+                            except Exception as e:
+                                pass
                             line = max1[i - 2]
                         else:
                             title = line.split(b'<dc:title><rdf:Alt><rdf:li xml:lang="x-default">',1)[1].decode('latin-1').split("/",1)[0].replace("<","")
                     if b"<dc:creator><rdf:Seq><rdf:li>" in line or b"<dc:creator>\n" in line:
                         if b"<dc:creator>\n" in line:
                             line = max1[i + 2]
-                            author = line.split(b"<rdf:li>",1)[1].decode('latin-1').replace("</rdf:li>", "").replace("<","")
+                            try:
+                                author = line.split(b"<rdf:li>",1)[1].decode('latin-1').replace("</rdf:li>", "").replace("<","")
+                            except Exception as e:
+                                pass
                             line = max1[i - 2]
                         else:
                             author = line.split(b"dc:creator><rdf:Seq><rdf:li>",1)[1].decode('latin-1').split("/",1)[0].replace("<","")
                     if b"<xmp:CreatorTool>" in line or b"<xmp:CreatorTool> " in line:
-                        tool = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:CreatorTool>","<xmp:CreatorTool>  ",i,max1,1,1,False,"",line,6,"")
+                        tool = Decoder.EXTRACTOR.GET_Metadata("<xmp:CreatorTool>","<xmp:CreatorTool>  ",i,max1,1,1,False,"",line,6,"")
                     if b"<xmp:MetadataDate>" in line or b"<xmp:MetadataDate> " in line:
-                        metadata_d = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:MetadataDate>","<xmp:MetadataDate> ",i,max1,1,1,False,"",line,5,"")
+                        metadata_d = Decoder.EXTRACTOR.GET_Metadata("<xmp:MetadataDate>","<xmp:MetadataDate> ",i,max1,1,1,False,"",line,5,"")
                     if b"<xmpMM:DocumentID>" in line or b"<xmpMM:DocumentID> " in line:
-                        docId = Decoder.EXTRACTOR.EXIF_Metadata("<xmpMM:DocumentID>","<xmpMM:DocumentID> ",i,max1,1,1,False,"",line,5,"")
+                        docId = Decoder.EXTRACTOR.GET_Metadata("<xmpMM:DocumentID>","<xmpMM:DocumentID> ",i,max1,1,1,False,"",line,5,"")
                     if b"<xmpMM:InstanceID>" in line or b"<xmpMM:InstanceID> " in line:
-                        instId = Decoder.EXTRACTOR.EXIF_Metadata("<xmpMM:InstanceID>","<xmpMM:InstanceID> ",i,max1,1,1,False,"",line,5,"")
+                        instId = Decoder.EXTRACTOR.GET_Metadata("<xmpMM:InstanceID>","<xmpMM:InstanceID> ",i,max1,1,1,False,"",line,5,"")
                     if b"<pdfx:Company>" in line or b"<pdfx:Company> " in line:
-                        company = Decoder.EXTRACTOR.EXIF_Metadata("<pdfx:Company>","<pdfx:Company> ",i,max1,1,1,False,"",line,5,"")
+                        company = Decoder.EXTRACTOR.GET_Metadata("<pdfx:Company>","<pdfx:Company> ",i,max1,1,1,False,"",line,5,"")
                         if company == "" or company == " ":
                             company == "None"
                     if b"<pdfx:SourceModified>" in line or b"<pdfx:SourceModified> " in line:
@@ -219,90 +240,71 @@ class DOCUMENTS:
                         if sour_mod == "" or sour_mod == " ":
                             sour_mod == "None"
                     if b"<stEvt:action>" in line or b"<stEvt:action> " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:action>","<stEvt:action> ",i,max1,1,1,True,events,line,5,"")
+                        Decoder.EXTRACTOR.GET_Metadata("<stEvt:action>","<stEvt:action> ",i,max1,1,1,True,events,line,5,"")
                     if b"<stEvt:when>" in line or b"<stEvt:when> " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:when>","<stEvt:when> ",i,max1,1,1,True,times,line,5,"")
+                        Decoder.EXTRACTOR.GET_Metadata("<stEvt:when>","<stEvt:when> ",i,max1,1,1,True,times,line,5,"")
                     if b"<stEvt:instanceID>" in line or b"<stEvt:instanceID> " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:instanceID>","<stEvt:instanceID> ",i,max1,1,1,True,instances,line,5,"")
+                        Decoder.EXTRACTOR.GET_Metadata("<stEvt:instanceID>","<stEvt:instanceID> ",i,max1,1,1,True,instances,line,5,"")
                     if b"<stEvt:softwareAgent>" in line or b"<stEvt:softwareAgent> " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:softwareAgent>","<stEvt:softwareAgent> ",i,max1,1,1,True,agents,line,5," ")
+                        Decoder.EXTRACTOR.GET_Metadata("<stEvt:softwareAgent>","<stEvt:softwareAgent> ",i,max1,1,1,True,agents,line,5," ")
                     if b"<stEvt:changed>" in line or b"<stEvt:changed> " in line:
-                        Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:changed>","<stEvt:changed> ",i,max1,1,1,True,changes,line,7,"/stEvt:changed")
+                        Decoder.EXTRACTOR.GET_Metadata("<stEvt:changed>","<stEvt:changed> ",i,max1,1,1,True,changes,line,7,"/stEvt:changed")
                     if image == "True":
                         if b"tiff:ImageWidth=" in line or b"tiff:ImageWidth= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("tiff:ImageWidth=","tiff:ImageWidth= ",i,max1,1,1,True,width2,line,8," ")
+                            Decoder.EXTRACTOR.GET_Metadata("tiff:ImageWidth=","tiff:ImageWidth= ",i,max1,1,1,True,width2,line,8," ")
                         if b"tiff:ImageLength=" in line or b"tiff:ImageLength= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("tiff:ImageLength=","tiff:ImageLength= ",i,max1,1,1,True,height2,line,8," ")
+                            Decoder.EXTRACTOR.GET_Metadata("tiff:ImageLength=","tiff:ImageLength= ",i,max1,1,1,True,height2,line,8," ")
                         if b"tiff:Make=" in line or b"tiff:Make= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("tiff:Make=","tiff:Make= ",i,max1,1,1,True,device,line,8,'" ')
+                            Decoder.EXTRACTOR.GET_Metadata("tiff:Make=","tiff:Make= ",i,max1,1,1,True,device,line,8,'" ')
                         if b"tiff:Model=" in line or b"tiff:Model= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("tiff:Model=","tiff:Model= ",i,max1,1,1,True,images,line,8,'" ')
+                            Decoder.EXTRACTOR.GET_Metadata("tiff:Model=","tiff:Model= ",i,max1,1,1,True,images,line,8,'" ')
                     if photoshop == "True":
                         if b"stEvt:action=" in line or b"stEvt:action= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("stEvt:action=","stEvt:action= ",i,max1,1,1,True,events,line,8," ")
+                            Decoder.EXTRACTOR.GET_Metadata("stEvt:action=","stEvt:action= ",i,max1,1,1,True,events,line,8," ")
                         if b"stEvt:when=" in line or b"stEvt:when= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("stEvt:when=","stEvt:when= ",i,max1,1,1,True,times,line,8," ")
+                            Decoder.EXTRACTOR.GET_Metadata("stEvt:when=","stEvt:when= ",i,max1,1,1,True,times,line,8," ")
                         if b"stEvt:instanceID=" in line or b"stEvt:instanceID= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("stEvt:instanceID=","stEvt:instanceID= ",i,max1,1,1,True,instances,line,8," ")
+                            Decoder.EXTRACTOR.GET_Metadata("stEvt:instanceID=","stEvt:instanceID= ",i,max1,1,1,True,instances,line,8," ")
                         if b"stEvt:parameters=" in line or b"stEvt:parameters= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("stEvt:parameters=","stEvt:parameters= ",i,max1,1,1,True,parms,line,8,'/>')
+                            Decoder.EXTRACTOR.GET_Metadata("stEvt:parameters=","stEvt:parameters= ",i,max1,1,1,True,parms,line,8,'/>')
                         if b"stEvt:softwareAgent=" in line or b"stEvt:softwareAgent= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("stEvt:softwareAgent=","stEvt:softwareAgent= ",i,max1,1,1,True,agents,line,8,'" ')
+                            Decoder.EXTRACTOR.GET_Metadata("stEvt:softwareAgent=","stEvt:softwareAgent= ",i,max1,1,1,True,agents,line,8,'" ')
                         if b"stEvt:changed=" in line or b"stEvt:changed= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("stEvt:changed=","stEvt:changed= ",i,max1,1,1,True,changes,line,8," ")
+                            Decoder.EXTRACTOR.GET_Metadata("stEvt:changed=","stEvt:changed= ",i,max1,1,1,True,changes,line,8," ")
                 i = i +1
             reader.close()
             if vrb == 1:
                 print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "File-Name: {}".format(Colors.Color.GREEN + name))
-                if title != "None" and title != " ()\r\n":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Title: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(title))
-                if pdf_version != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Version: " + Colors.Color.GREEN +  Formatting.TEXT.FORMATTED(pdf_version))
+                Printer.GENERATE.Sentence(title,"None","Title: ")
+                Printer.GENERATE.Sentence(pdf_version,"None","Pdf-Version: ")
                 print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Encrypted: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(encrypted))
                 if encrypted != "False":
-                    if version != "None":
-                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Encryption: " + Colors.Color.GREEN + version)
-                if pw_protected != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Password-Protected: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(pw_protected))
-                if tool != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creator-Tool: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(tool))
-                if metadata_d != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Metadata-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(metadata_d))
-                if creator != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Creator: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creator))
+                    Printer.GENERATE.Sentence(version,"None","Encryption: ")
+                Printer.GENERATE.Sentence(pw_protected,"None","Password-Protected: ")
+                Printer.GENERATE.Sentence(tool,"None","Creator-Tool: ")
+                Printer.GENERATE.Sentence(metadata_d,"None","Metadata-Date: ")
+                Printer.GENERATE.Sentence(creator,"None","Pdf-Creator: ")
                 if encrypted == "False":
-                    if creation != "None":
-                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Creation-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creation))
-                    if mod_date != "None":
-                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pdf-Modification-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(mod_date))
+                    Printer.GENERATE.Sentence(creation,"None","Pdf-Creation-Date: ")
+                    Printer.GENERATE.Sentence(mod_date,"None","Pdf-Modification-Date: ")
                 if len(permissions_l):
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Permissions: " + Colors.Color.GREEN + str(permissions_l).replace("[","").replace("]",""))
-                if docId != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Document-Id: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(docId))
-                if instId != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Instance-Id: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(instId))
-                if layout != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Layout: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(layout))
-                if key != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Keywords: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(key))
-                if pages != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pages: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(pages))
+                Printer.GENERATE.Sentence(docId,"None","Document-Id: ")
+                Printer.GENERATE.Sentence(instId,"None","Instance-Id: ")
+                Printer.GENERATE.Sentence(layout,"None","Layout: ")
+                Printer.GENERATE.Sentence(key,"None","Keywords: ")
+                Printer.GENERATE.Sentence(pages,"None","Pages: ")
                 if encrypted == "False":
-                    if lang != "None":
-                        print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Language: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(lang))
-                if author != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Author: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(author))
-                if company != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Company: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(company))
-                if sour_mod != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Source-Modified: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(sour_mod))
-                if doc_ch != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Document-Checksum: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(doc_ch))
+                    Printer.GENERATE.Sentence(lang,"None","Language: ")
+                Printer.GENERATE.Sentence(author,"None","Author: ")
+                Printer.GENERATE.Sentence(company,"None","Company: ")
+                Printer.GENERATE.Sentence(sour_mod,"None","Source-Modified: ")
+                Printer.GENERATE.Sentence(doc_ch,"None","Document-Checksum: ")
                 if adv == 1:
                     if len(link):
                         i = 1
                         for links in link:
-                            print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Uri'n°{}: ".format(i) + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(links))
+                            print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Uri'n°{}: ".format(i) + Colors.Color.GREEN + Formatting.TEXT.FORMATTED_URL(links))
                             i = i + 1
                     if len(annotation):
                         i = 1
@@ -394,7 +396,8 @@ class DOCUMENTS:
                             v = v + 1
                     if len(suspect_keys):
                         print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Suspect Keywords Found")
-                        descriptions = ["Execute JavaScript code","Execute a specific action at document opening","External file embedded in the document","Embeed flash in a document","Data hidden in Object Stream","Send External Data","URI can sometimes be malicious"]
+                        descriptions = ["Execute JavaScript code","Execute a specific action at document opening","External file embedded in the document","Embeed flash in a document","Data hidden in Object Stream","Send External Data","URI can sometimes be malicious","Launch an external application or document"]
+                        severity = ["High","Medium","Low"]
                         js = 0
                         oa = 0
                         aa = 0
@@ -403,6 +406,7 @@ class DOCUMENTS:
                         obm = 0
                         gor = 0
                         ur = 0
+                        ln = 0
                         for keys in suspect_keys:
                             keys = Formatting.TEXT.FORMATTED(keys).replace(" ","")
                             if keys == "JavaScriptJS":
@@ -421,22 +425,26 @@ class DOCUMENTS:
                                 gor = gor + 1
                             elif keys == "URI":
                                 ur = ur + 1
+                            elif keys == "Launch":
+                                ln = ln + 1
                         if js != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "JavaScript/JS: {} Description: {}".format(Colors.Color.GREEN + str(js) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[0]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "JavaScript/JS: {} Times Found Description: {} Severity: {}".format(Colors.Color.GREEN + str(js) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[0]))
                         if oa != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "OpenAction: {} Description: {}".format(Colors.Color.GREEN + str(oa) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[1]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "OpenAction: {} Times Found Description: {}".format(Colors.Color.GREEN + str(oa) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[1]))
                         if aa != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "AA: {} Description: {}".format(Colors.Color.GREEN + str(aa) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[1]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "AA: {} Times Found Description: {}".format(Colors.Color.GREEN + str(aa) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[1]))
                         if ef != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "EmbeddedFile: {} Description: {}".format(Colors.Color.GREEN + str(ef) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[2]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "EmbeddedFile: {} Times Found Description: {}".format(Colors.Color.GREEN + str(ef) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[2]))
                         if rme != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "RichMedia: {} Description: {}".format(Colors.Color.GREEN + str(rme) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[3]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "RichMedia: {} Times Found Description: {}".format(Colors.Color.GREEN + str(rme) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[3]))
                         if obm != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "ObjectStream: {} Description: {}".format(Colors.Color.GREEN + str(obm) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[4]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "ObjectStream: {} Times Found Description: {}".format(Colors.Color.GREEN + str(obm) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[4]))
                         if gor != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "SubmitForm/GoToR: {} Description: {}".format(Colors.Color.GREEN + str(gor) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[5]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "SubmitForm/GoToR: {} Times Found Description: {}".format(Colors.Color.GREEN + str(gor) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[5]))
                         if ur != 0:
-                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "URI: {} Description: {}".format(Colors.Color.GREEN + str(ur) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[6]))
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "URI: {} Times Found Description: {}".format(Colors.Color.GREEN + str(ur) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[6]))
+                        if ln != 0:
+                            print(Colors.Color.RED + "[-]" + Colors.Color.WHITE + "Launch: {} Times Found Description: {}".format(Colors.Color.GREEN + str(ln) + Colors.Color.WHITE,Colors.Color.GREEN + descriptions[7]))
 
             else:
                 print(Colors.Color.BLUE + "[I]" + Colors.Color.WHITE + "Process completed")
@@ -579,48 +587,27 @@ class DOCUMENTS:
              
             if vrb == 1:
                 print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "File-Name: {}".format(Colors.Color.GREEN + name))
-                if title != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Title: " + Colors.Color.GREEN + title)
-                if description != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Description: " + Colors.Color.GREEN + description)
-                if keywords != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Keywords: " + Colors.Color.GREEN + keywords)
-                if revision != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Revision: " + Colors.Color.GREEN + revision + " Times")
-                if revision_t != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Revision-Time: " + Colors.Color.GREEN + revision_t)
-                if creator != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creator: " + Colors.Color.GREEN + creator)
-                if date != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Date: " + Colors.Color.GREEN + date)
-                if creation != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creation-Date: " + Colors.Color.GREEN + creation)
-                if last_mod != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Last-Modified-By: " + Colors.Color.GREEN + last_mod)
-                if mod_date != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Modification-Date: " + Colors.Color.GREEN + mod_date)
-                if last_printed != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Last-Printed: " + Colors.Color.GREEN + last_printed)
-                if language != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Language: " + Colors.Color.GREEN + language)
-                if pagesn != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Pages: " + Colors.Color.GREEN + pagesn)
-                if paragraph != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Paragraphs: " + Colors.Color.GREEN + paragraph)
-                if table != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Table-Count: " + Colors.Color.GREEN + table)
-                if im_count != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Image-Count: " + Colors.Color.GREEN + im_count)
-                if obj != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Object-Count: " + Colors.Color.GREEN + obj)
-                if char_count != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Characters-Count: " + Colors.Color.GREEN + char_count)
-                if n_c_space != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Non-Whitespace-Character-Count: " + Colors.Color.GREEN + n_c_space)
-                if template != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Template: " + Colors.Color.GREEN + template)
-                if tool_c != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Application: " + Colors.Color.GREEN + tool_c)
+                Printer.GENERATE.Sentence(title,"None","Title: ")
+                Printer.GENERATE.Sentence(description,"None","Description: ")
+                Printer.GENERATE.Sentence(keywords,"None","Keywords: ")
+                Printer.GENERATE.Sentence(revision,"None","Revision: ")
+                Printer.GENERATE.Sentence(revision_t,"None","Revision-Time: ")
+                Printer.GENERATE.Sentence(creator,"None","Creator: ")
+                Printer.GENERATE.Sentence(date,"None","Date: ")
+                Printer.GENERATE.Sentence(creation,"None","Creation-Date: ")
+                Printer.GENERATE.Sentence(last_mod,"None","Last-Modified-By: ")
+                Printer.GENERATE.Sentence(mod_date,"None","Modification-Date: ")
+                Printer.GENERATE.Sentence(last_printed,"None","Last-Printed: ")
+                Printer.GENERATE.Sentence(language,"None","Language: ")
+                Printer.GENERATE.Sentence(pagesn,"None","Pages: ")
+                Printer.GENERATE.Sentence(paragraph,"None","Paragraphs: ")
+                Printer.GENERATE.Sentence(table,"None","Table-Count: ")
+                Printer.GENERATE.Sentence(im_count,"None","Image-Count: ")
+                Printer.GENERATE.Sentence(obj,"None","Object-Count: ")
+                Printer.GENERATE.Sentence(char_count,"None","Characters-Count: ")
+                Printer.GENERATE.Sentence(n_c_space,"None","Non-Whitespace-Character-Count: ")
+                Printer.GENERATE.Sentence(template,"None","Template: ")
+                Printer.GENERATE.Sentence(tool_c,"None","Application: ")
                 if t_time != "None":
                     t_time2 = int(t_time)/60
                     if t_time2 < 1:
@@ -631,8 +618,7 @@ class DOCUMENTS:
                         t_time2 = round(t_time2 / 23.878,2)
                         t_time = str(t_time2) + " Days"
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Total-Time: " + Colors.Color.GREEN + t_time)
-                if lines != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Lines: " + Colors.Color.GREEN + lines)
+                Printer.GENERATE.Sentence(lines,"None","Lines: ")
                 if security != "None":
                     if security == "0":
                         sec = "Undefined"
@@ -647,32 +633,18 @@ class DOCUMENTS:
                     else:
                         sec = "Unknown"
                     print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Doc-Security: " + Colors.Color.GREEN + sec)
-                if pres_format != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Presentation-Format: " + Colors.Color.GREEN + pres_format)
-                if slides != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Slides: " + Colors.Color.GREEN + slides)
-                if h_slides != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Hidden-Slides: " + Colors.Color.GREEN + h_slides)
-                if notes != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Notes: " + Colors.Color.GREEN + notes)
-                if mmclips != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "MMClips: " + Colors.Color.GREEN + mmclips)
-                if shared != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Shared: " + Colors.Color.GREEN + shared)
-                if creation != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Company: " + Colors.Color.GREEN + company)
-                if words != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Words: " + Colors.Color.GREEN + words)
-                if c_space != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Characters-With-Space: " + Colors.Color.GREEN + c_space)
-                if app_v != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "App-Version: " + Colors.Color.GREEN + app_v)
-                if r_only != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Read-Only: " + Colors.Color.GREEN + r_only)
-                if pw_protected != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Password-Protected: " + Colors.Color.GREEN + "True" + Colors.Color.WHITE + " Encoded-Base64Binary-Password: " + Colors.Color.GREEN +  pw_protected)
-                else:
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Password-Protected: " + Colors.Color.GREEN + "False" )
+                Printer.GENERATE.Sentence(pres_format,"None","Presentation-Format: ")
+                Printer.GENERATE.Sentence(slides,"None","Slides: ")
+                Printer.GENERATE.Sentence(h_slides,"None","Hidden-Slides: ")
+                Printer.GENERATE.Sentence(notes,"None","Notes: ")
+                Printer.GENERATE.Sentence(mmclips,"None","MMClips: ")
+                Printer.GENERATE.Sentence(shared,"None","Shared: ")
+                Printer.GENERATE.Sentence(company,"None","Company: ")
+                Printer.GENERATE.Sentence(words,"None","Words: ")
+                Printer.GENERATE.Sentence(c_space,"None","Characters-With-Space: ")
+                Printer.GENERATE.Sentence(app_v,"None","App-Version: ")
+                Printer.GENERATE.Sentence(r_only,"None","Read-Only: ")
+                Printer.GENERATE.Sentence(pw_protected,"None","Password-Protected: ")
                 if len(images_s):
                     print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Printing Extracted images")
                     i = 1
@@ -840,70 +812,70 @@ class DOCUMENTS:
                             else:
                                 author = line.split(b"dc:creator><rdf:Seq><rdf:li>",1)[1].decode('latin-1').split("/",1)[0].replace("<","")
                         if b"stEvt:action=" in line or b"stEvt:action= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:action=","stEvt:action= ",i,max1,1,1,True,events,line,8," ")
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:action=","stEvt:action= ",i,max1,1,1,True,events,line,8," ")
                         if b"stEvt:when=" in line or b"stEvt:when= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:when=","stEvt:when= ",i,max1,1,1,True,times,line,8," ")
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:when=","stEvt:when= ",i,max1,1,1,True,times,line,8," ")
                         if b"stEvt:instanceID=" in line or b"stEvt:instanceID= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:instanceID=","stEvt:instanceID= ",i,max1,1,1,True,instances,line,8," ")
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:instanceID=","stEvt:instanceID= ",i,max1,1,1,True,instances,line,8," ")
                         if b"stEvt:softwareAgent=" in line or b"stEvt:softwareAgent= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:softwareAgent=","stEvt:softwareAgent= ",i,max1,1,1,True,agents,line,8," ")
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:softwareAgent=","stEvt:softwareAgent= ",i,max1,1,1,True,agents,line,8," ")
                         if b"stEvt:changed=" in line or b"stEvt:changed= " in line:
-                            Decoder.EXTRACTOR.EXIF_Metadata("stEvt:changed=","stEvt:changed= ",i,max1,1,1,True,changes,line,7," ")
+                            Decoder.EXTRACTOR.GET_Metadata("stEvt:changed=","stEvt:changed= ",i,max1,1,1,True,changes,line,7," ")
                     if photoshop == "True":
                         if extension == "psd":
                             if b"<xmp:CreatorTool>" in line or b"/ModDate " in line:
-                                tool = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:CreatorTool>","<xmp:CreatorTool>  ",i,max1,1,1,False,"",line,6,"")
+                                tool = Decoder.EXTRACTOR.GET_Metadata("<xmp:CreatorTool>","<xmp:CreatorTool>  ",i,max1,1,1,False,"",line,6,"")
                             if b"<xmp:MetadataDate>" in line or b"/ModDate " in line:
-                                metadata_d = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:MetadataDate>","<xmp:MetadataDate> ",i,max1,1,1,False,"",line,5,"")
+                                metadata_d = Decoder.EXTRACTOR.GET_Metadata("<xmp:MetadataDate>","<xmp:MetadataDate> ",i,max1,1,1,False,"",line,5,"")
                             if b"<xmpMM:DocumentID>" in line or b"/ModDate " in line:
-                                docid = Decoder.EXTRACTOR.EXIF_Metadata("<xmpMM:DocumentID>","<xmpMM:DocumentID> ",i,max1,1,1,False,"",line,5,"")
+                                docid = Decoder.EXTRACTOR.GET_Metadata("<xmpMM:DocumentID>","<xmpMM:DocumentID> ",i,max1,1,1,False,"",line,5,"")
                             if b"<xmpMM:InstanceID>" in line or b"/ModDate " in line:
-                                instid = Decoder.EXTRACTOR.EXIF_Metadata("<xmpMM:InstanceID>","<xmpMM:InstanceID> ",i,max1,1,1,False,"",line,5,"")
+                                instid = Decoder.EXTRACTOR.GET_Metadata("<xmpMM:InstanceID>","<xmpMM:InstanceID> ",i,max1,1,1,False,"",line,5,"")
                             if b"<xmp:CreateDate>" in line or b"<xmp:CreateDate> " in line:
-                                creation = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:CreateDate>","<xmp:CreateDate> ",i,max1,1,1,False,"",line,5,"")
+                                creation = Decoder.EXTRACTOR.GET_Metadata("<xmp:CreateDate>","<xmp:CreateDate> ",i,max1,1,1,False,"",line,5,"")
                             if b"<xmp:ModifyDate>" in line or b"/ModDate " in line:
-                                mod_date = Decoder.EXTRACTOR.EXIF_Metadata("<xmp:ModifyDate>","<xmp:ModifyDate> ",i,max1,1,1,False,"",line,5,"")
+                                mod_date = Decoder.EXTRACTOR.GET_Metadata("<xmp:ModifyDate>","<xmp:ModifyDate> ",i,max1,1,1,False,"",line,5,"")
                             if b"<xmpMM:OriginalDocumentID>" in line or b"<xmpMM:OriginalDocumentID> " in line:
-                                odid = Decoder.EXTRACTOR.EXIF_Metadata("<xmpMM:OriginalDocumentID>","<xmpMM:OriginalDocumentID> ",i,max1,1,1,False,"",line,5,"")
+                                odid = Decoder.EXTRACTOR.GET_Metadata("<xmpMM:OriginalDocumentID>","<xmpMM:OriginalDocumentID> ",i,max1,1,1,False,"",line,5,"")
                             if b"<photoshop:ColorMode>" in line or b"<photoshop:ColorMode> " in line:
-                                col_mode = Decoder.EXTRACTOR.EXIF_Metadata("<photoshop:ColorMode>","<photoshop:ColorMode> ",i,max1,1,1,False,"",line,5," ")
+                                col_mode = Decoder.EXTRACTOR.GET_Metadata("<photoshop:ColorMode>","<photoshop:ColorMode> ",i,max1,1,1,False,"",line,5," ")
                             if b"<stEvt:action>" in line or b"<stEvt:action> " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:action>","<stEvt:action> ",i,max1,1,1,True,events,line,5,"")
+                                Decoder.EXTRACTOR.GET_Metadata("<stEvt:action>","<stEvt:action> ",i,max1,1,1,True,events,line,5,"")
                             if b"<stEvt:when>" in line or b"<stEvt:when> " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:when>","<stEvt:when> ",i,max1,1,1,True,times,line,5,"")
+                                Decoder.EXTRACTOR.GET_Metadata("<stEvt:when>","<stEvt:when> ",i,max1,1,1,True,times,line,5,"")
                             if b"<stEvt:instanceID>" in line or b"<stEvt:instanceID> " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:instanceID>","<stEvt:instanceID> ",i,max1,1,1,True,instances,line,5,"")
+                                Decoder.EXTRACTOR.GET_Metadata("<stEvt:instanceID>","<stEvt:instanceID> ",i,max1,1,1,True,instances,line,5,"")
                             if b"<stEvt:softwareAgent>" in line or b"<stEvt:softwareAgent> " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:softwareAgent>","<stEvt:softwareAgent> ",i,max1,1,1,True,agents,line,5,"")
+                                Decoder.EXTRACTOR.GET_Metadata("<stEvt:softwareAgent>","<stEvt:softwareAgent> ",i,max1,1,1,True,agents,line,5,"")
                             if b"<stEvt:changed>" in line or b"<stEvt:changed> " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("<stEvt:changed>","<stEvt:changed> ",i,max1,1,1,True,changes,line,7,"/stEvt:changed")
+                                Decoder.EXTRACTOR.GET_Metadata("<stEvt:changed>","<stEvt:changed> ",i,max1,1,1,True,changes,line,7,"/stEvt:changed")
                         else:
                             if b"xmp:CreatorTool=" in line or b"xmp:CreatorTool= " in line:
-                                tool = Decoder.EXTRACTOR.EXIF_Metadata("xmp:CreatorTool=","xmp:CreatorTool=  ",i,max1,1,1,False,"",line,8,'" ')
+                                tool = Decoder.EXTRACTOR.GET_Metadata("xmp:CreatorTool=","xmp:CreatorTool=  ",i,max1,1,1,False,"",line,8,'" ')
                             if b"xmp:CreateDate=" in line or b"xmp:CreateDate= " in line:
-                                creation = Decoder.EXTRACTOR.EXIF_Metadata("xmp:CreateDate=","xmp:CreateDate=  ",i,max1,1,1,False,"",line,8," ")
+                                creation = Decoder.EXTRACTOR.GET_Metadata("xmp:CreateDate=","xmp:CreateDate=  ",i,max1,1,1,False,"",line,8," ")
                             if b"xmp:MetadataDate=" in line or b"xmp:MetadataDate= " in line:
-                                metadata_d = Decoder.EXTRACTOR.EXIF_Metadata("xmp:MetadataDate=","xmp:MetadataDate  ",i,max1,1,1,False,"",line,8," ")
+                                metadata_d = Decoder.EXTRACTOR.GET_Metadata("xmp:MetadataDate=","xmp:MetadataDate  ",i,max1,1,1,False,"",line,8," ")
                             if b"xmp:ModifyDate=" in line or b"xmp:ModifyDate= " in line:
-                                mod_date = Decoder.EXTRACTOR.EXIF_Metadata("xmp:ModifyDate=","xmp:ModifyDate=  ",i,max1,1,1,False,"",line,8," ")
+                                mod_date = Decoder.EXTRACTOR.GET_Metadata("xmp:ModifyDate=","xmp:ModifyDate=  ",i,max1,1,1,False,"",line,8," ")
                             if b"xmpMM:InstanceID=" in line or b"xmpMM:InstanceID= " in line:
-                                instid = Decoder.EXTRACTOR.EXIF_Metadata("xmpMM:InstanceID=","xmpMM:InstanceID= ",i,max1,1,1,False,"",line,8," ")
+                                instid = Decoder.EXTRACTOR.GET_Metadata("xmpMM:InstanceID=","xmpMM:InstanceID= ",i,max1,1,1,False,"",line,8," ")
                             if b"xmpMM:DocumentID=" in line or b"xmpMM:DocumentID= " in line:
-                                docid = Decoder.EXTRACTOR.EXIF_Metadata("xmpMM:DocumentID=","xmpMM:DocumentID= ",i,max1,1,1,False,"",line,8," ")
+                                docid = Decoder.EXTRACTOR.GET_Metadata("xmpMM:DocumentID=","xmpMM:DocumentID= ",i,max1,1,1,False,"",line,8," ")
                             if b"xmpMM:OriginalDocumentID=" in line or b"xmpMM:OriginalDocumentID= " in line:
-                                odid = Decoder.EXTRACTOR.EXIF_Metadata("xmpMM:OriginalDocumentID=","xmpMM:OriginalDocumentID= ",i,max1,1,1,False,"",line,8," ")
+                                odid = Decoder.EXTRACTOR.GET_Metadata("xmpMM:OriginalDocumentID=","xmpMM:OriginalDocumentID= ",i,max1,1,1,False,"",line,8," ")
                             if b"photoshop:ColorMode=" in line or b"photoshop:ColorMode= " in line:
-                                col_mode = Decoder.EXTRACTOR.EXIF_Metadata("photoshop:ColorMode=","photoshop:ColorMode= ",i,max1,1,1,False,"",line,8," ")
+                                col_mode = Decoder.EXTRACTOR.GET_Metadata("photoshop:ColorMode=","photoshop:ColorMode= ",i,max1,1,1,False,"",line,8," ")
                             if b"stEvt:action=" in line or b"stEvt:action= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:action=","stEvt:action= ",i,max1,1,1,True,events,line,8," ")
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:action=","stEvt:action= ",i,max1,1,1,True,events,line,8," ")
                             if b"stEvt:when=" in line or b"stEvt:when= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:when=","stEvt:when= ",i,max1,1,1,True,times,line,8," ")
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:when=","stEvt:when= ",i,max1,1,1,True,times,line,8," ")
                             if b"stEvt:instanceID=" in line or b"stEvt:instanceID= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:instanceID=","stEvt:instanceID= ",i,max1,1,1,True,instances,line,8," ")
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:instanceID=","stEvt:instanceID= ",i,max1,1,1,True,instances,line,8," ")
                             if b"stEvt:softwareAgent=" in line or b"stEvt:softwareAgent= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:softwareAgent=","stEvt:softwareAgent= ",i,max1,1,1,True,agents,line,8,'" ')
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:softwareAgent=","stEvt:softwareAgent= ",i,max1,1,1,True,agents,line,8,'" ')
                             if b"stEvt:changed=" in line or b"stEvt:changed= " in line:
-                                Decoder.EXTRACTOR.EXIF_Metadata("stEvt:changed=","stEvt:changed= ",i,max1,1,1,True,changes,line,8," ")
+                                Decoder.EXTRACTOR.GET_Metadata("stEvt:changed=","stEvt:changed= ",i,max1,1,1,True,changes,line,8," ")
                 i = i +1
             reader.close()
             if vrb == 1:
@@ -911,36 +883,21 @@ class DOCUMENTS:
                 if megapixel != 0:
                     print(Colors.Color.YELLOW + "[v]" +  Colors.Color.WHITE + "Image-Size: {}x{}".format(Colors.Color.GREEN + str(width) + Colors.Color.WHITE, Colors.Color.GREEN + str(height)))
                     print(Colors.Color.YELLOW + "[v]" +  Colors.Color.WHITE + "Megapixel: {}".format(Colors.Color.GREEN + str(megapixel)))
-                if byte_order != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Byte-Order: {}".format(Colors.Color.GREEN + byte_order))
-                if creator != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creator: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creator)))
-                if tool != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creator-Tool: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(tool))
-                if creation != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creation-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creation))
-                if mod_date != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Modification-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(mod_date))
-                if metadata_d != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Metadata-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(metadata_d))
-                if docid != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Document-Id: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(docid)))
-                if instid != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Instace-Id: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(instid)))
-                if odid != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Original-Id: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(odid)))
-                if col_mode != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Color Mode: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(col_mode)))
-                if api != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Gimp-Api: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(api)))
-                if version != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Gimp-Version: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(version)))
-                if platform != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Gimp-Platform: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(platform)))
-                if timestamp != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Timestamp: {}".format(Colors.Color.GREEN + Formatting.TEXT.FORMATTED(timestamp)))
-                if author != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Author: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(author))
+                Printer.GENERATE.Sentence(byte_order,"None","Byte-Order: ")
+                Printer.GENERATE.Sentence(creator,"None","Creator: ")
+                Printer.GENERATE.Sentence(tool,"None","Creator-Tool: ")
+                Printer.GENERATE.Sentence(creation,"None","Creation-Date: ")
+                Printer.GENERATE.Sentence(mod_date,"None","Modification-Date: ")
+                Printer.GENERATE.Sentence(metadata_d,"None","Metadata-Date: ")
+                Printer.GENERATE.Sentence(docid,"None","Document-Id: ")
+                Printer.GENERATE.Sentence(instid,"None","Instance-Id: ")
+                Printer.GENERATE.Sentence(odid,"None","Original-Id: ")
+                Printer.GENERATE.Sentence(col_mode,"None","Color-Mode: ")
+                Printer.GENERATE.Sentence(api,"None","Gimp-Api: ")
+                Printer.GENERATE.Sentence(version,"None","Gimp-Version: ")
+                Printer.GENERATE.Sentence(platform,"None","Gimp-Platform: ")
+                Printer.GENERATE.Sentence(timestamp,"None","Timestamp: ")
+                Printer.GENERATE.Sentence(author,"None","Author: ")
                 if adv == 1:
                     if len(times):
                         print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Printing file Events")
@@ -1018,24 +975,20 @@ class DOCUMENTS:
             for line in max1:
                 if adobe == "True":
                     if b"<Attrib:Created>" in line or b"<Attrib:Created> " in line:
-                        creator = Decoder.EXTRACTOR.EXIF_Metadata("<Attrib:Created>","<Attrib:Created> ",i,max1,1,1,False,"",line,6,"")
+                        creator = Decoder.EXTRACTOR.GET_Metadata("<Attrib:Created>","<Attrib:Created> ",i,max1,1,1,False,"",line,6,"")
                     if b"<Attrib:ExtId>" in line or b"<Attrib:ExtId> " in line:
-                        extid = Decoder.EXTRACTOR.EXIF_Metadata("<Attrib:ExtId>","<Attrib:ExtId> ",i,max1,1,1,False,"",line,6,"")
+                        extid = Decoder.EXTRACTOR.GET_Metadata("<Attrib:ExtId>","<Attrib:ExtId> ",i,max1,1,1,False,"",line,6,"")
                     if b"<Attrib:FbId>" in line or b"<Attrib:FbId> " in line:
-                        fbid = Decoder.EXTRACTOR.EXIF_Metadata("<Attrib:FbId>","<Attrib:FbId> ",i,max1,1,1,False,"",line,6,"")
+                        fbid = Decoder.EXTRACTOR.GET_Metadata("<Attrib:FbId>","<Attrib:FbId> ",i,max1,1,1,False,"",line,6,"")
                     if b"<Attrib:TouchType>" in line or b"<Attrib:TouchType> " in line:
-                        touchtype = Decoder.EXTRACTOR.EXIF_Metadata("<Attrib:TouchType>","<Attrib:TouchType> ",i,max1,1,1,False,"",line,6,"")
+                        touchtype = Decoder.EXTRACTOR.GET_Metadata("<Attrib:TouchType>","<Attrib:TouchType> ",i,max1,1,1,False,"",line,6,"")
                 i = i +1
             if vrb == 1:
                 print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "File-Name: {}".format(Colors.Color.GREEN + name))
-                if creator != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Creation-Date: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(creator))
-                if extid != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Ads Ext-Id: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(extid))
-                if fbid != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Ads Fb-Id: " + Colors.Color.GREEN +  Formatting.TEXT.FORMATTED(fbid))
-                if touchtype != "None":
-                    print(Colors.Color.YELLOW + "[v]" + Colors.Color.WHITE + "Ads Touchtype: " + Colors.Color.GREEN + Formatting.TEXT.FORMATTED(touchtype))
+                Printer.GENERATE.Sentence(creator,"None","Creation-Date: ")
+                Printer.GENERATE.Sentence(extid,"None","Ads Ext-Id: ")
+                Printer.GENERATE.Sentence(fbid,"None","Ads Fb-Id: ")
+                Printer.GENERATE.Sentence(touchtype,"None","Ads Touchtype: ")
             else:
                 print(Colors.Color.BLUE + "[I]" + Colors.Color.WHITE + "Process completed")
             

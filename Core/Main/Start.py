@@ -49,7 +49,7 @@ class MAIN:
                 date = datetime.datetime.now()
                 Write_File.OUTPUT.HEADER_FILE("Information",output,date,name)
             if os.path.exists(filename):
-                extension = Local.GET_DATA.Parameters(name,filename,vrb,out,output)
+                extension = Local.GET_DATA.Parameters(f_name,filename,vrb,out,output)
                 extension = extension.replace(" ","")
                 Hashes.GET_HASHES.Converter(filename,vrb,out,output)
                 Checksum.GET.CHECKSUM(filename,vrb,out,output)
@@ -57,7 +57,7 @@ class MAIN:
                 if out == 1:
                    date = datetime.datetime.now()
                    Write_File.OUTPUT.HEADER_FILE("Metadata",output,date,name)
-                Metadata.DOCUMENTS.File(extension,filename,name,adv,vrb,out,output,extr,txt_ext,term)
+                Metadata.DOCUMENTS.File(extension,filename,f_name,adv,vrb,out,output,extr,txt_ext,term)
                 print(Colors.Color.BLUE + "\n[I]" + Colors.Color.WHITE + "Output Saved on: {}".format(Colors.Color.GREEN + outfolder2))
             else:
                 print(Colors.Color.RED + "[!]" + Colors.Color.WHITE + "File not Found")

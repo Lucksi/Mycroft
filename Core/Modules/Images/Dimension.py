@@ -5,8 +5,9 @@
 
 import struct
 
-class IMAGE:
 
+class IMAGE:
+    
     @staticmethod
     def Megapixel(width,height):
         megapixel = width * height / 1000000
@@ -21,6 +22,7 @@ class IMAGE:
         img = open(origfile,"rb")
         reader = img.read()
         img.close()
+        print(reader)
         if extension == "png":
             img = open(origfile,"rb")
             reader = img.read()
