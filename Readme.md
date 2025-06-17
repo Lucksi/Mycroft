@@ -135,4 +135,4 @@ python3 main.py
 ## <p align = center>  ORIGINAL CREATOR: <a href = "https://github.com/Lucksi">LUCA GAROFALO (Lucksi)</a></p>
 
 
-## <p align = center>LICENSE: GPL-3.0 License <br>COPYRIGHT: (C) 2024 Lucksi  
+## <p align = center>LICENSE: GPL-3.0 License <br>COPYRIGHT: (C) 2024-2025 Lucksi  
