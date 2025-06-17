@@ -60,23 +60,30 @@ python3 main.py
 | `--ext_d`  | List Files of an external directory | list --ext_d /home/test/Desktop |
 | `--folder_name`  | Change the name of the output directory | --folder_name Test |
 | `--advanced`  | Extract advanced information from metadata | test.docx --advanced |
+| `--comments`  | Extract comments from the document | test.docx --comments |
 | `--text`  | Extract file text-content from document | test.docx --text |
+| `--urls`  | Extract urls from the document | test.docx --urls |
 | `--search`  | Search for a specific keyword in the document | test.docx --text --search Test |
-| `--verbose`  | Disable screen output | test.docx --verbose
-| `--noOutput`  | Disable file output | test.docx --noOutput
-| `--extraction`  | Extract media from documents or files from archives| test.docx --extraction
+| `--db_search`  | Search for a specific file in the database by (id,md5,sha1,sha256,sha512 or name) | --db_search test.txt |
+| `--adv_db_search`  | Create Custom search Query's | --adv_db_search name="test" AND extension = "txt"|
+| `--noVerbose`  | Disable screen output | test.docx --verbose
+| `--noOutput`  | Disable file output | test.docx --noOutput |
+| `--media`  | Extract media from documents| test.docx --media
+| `--extraction`  | Extract files from archives| test.zip --extraction
 
 ## Features:
 
 | Description | File-Format |
 | ------------- | ------------- |
-| Extract metadata  | docx, pdf, xlsx, pptx, jpg, png, mp4, odt, odp, odc, zip, apk, jar, psd|
+| Extract metadata  | docx, pdf, xlsx, pptx, jpg, png, mp4, odt, odg, dotx, potx , docm , xlsm , pptm, odp, odc, zip, apk, jar, psd, gif, jps, bmp, tar.xz, tar.gz, tar.bz2|
 | Get file hashes  | All formats |
 | Get local informations  | All formats |
 | Extract and Download media  | docx, pptx, odp, odt |
 | Extract Text  | docx, pptx, odt, odp|
+| Extract Comments  | docx, pptx, odt, odp|
+| Extract Urls  | docx, pptx, odt, odp|
 | Search Keyword  | docx, pptx, odt, odp|
-| Extract files  | zip, apk, jar |
+| Extract files  | zip, apk, jar, tar.xz, tar.gz, tar.bz2 |
 | Get archives file information  | zip, apk, jar |
 | Get archive information  | zip, apk, jar |
 | Get Pdf File Permission  | pdf |
@@ -128,4 +135,4 @@ python3 main.py
 ## <p align = center>  ORIGINAL CREATOR: <a href = "https://github.com/Lucksi">LUCA GAROFALO (Lucksi)</a></p>
 
 
-## <p align = center>LICENSE: GPL-3.0 License <br>COPYRIGHT: (C) 2024-2025 Lucksi  
+## <p align = center>LICENSE: GPL-3.0 License <br>COPYRIGHT: (C) 2024 Lucksi  
