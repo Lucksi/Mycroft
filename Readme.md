@@ -68,21 +68,21 @@ python3 main.py
 | `--adv_db_search`  | Create Custom search Query's | --adv_db_search name="test" AND extension = "txt"|
 | `--noVerbose`  | Disable screen output | test.docx --verbose
 | `--noOutput`  | Disable file output | test.docx --noOutput |
-| `--media`  | Extract media from documents| test.docx --media
+| `--media`  | Extract media from documents| test.docx -- advanced --media
 | `--extraction`  | Extract files from archives| test.zip --extraction
 
 ## Features:
 
 | Description | File-Format |
 | ------------- | ------------- |
-| Extract metadata  | docx, pdf, xlsx, pptx, jpg, png, mp4, odt, odg, dotx, potx , docm , xlsm , pptm, odp, odc, zip, apk, jar, psd, gif, jps, bmp, tar.xz, tar.gz, tar.bz2|
+| Extract metadata  | docx, pdf, xlsx, pptx, jpg, png, mp4, odt, odg, dotx, potx , docm , xlsm , pptm, odp, ods, zip, apk, jar, psd, gif, jps, bmp, tar.xz, tar.gz, tar.bz2|
 | Get file hashes  | All formats |
 | Get local informations  | All formats |
 | Extract and Download media  | docx, pptx, odp, odt |
-| Extract Text  | docx, pptx, odt, odp|
-| Extract Comments  | docx, pptx, odt, odp|
-| Extract Urls  | docx, pptx, odt, odp|
-| Search Keyword  | docx, pptx, odt, odp|
+| Extract Text  | docx, pptx, xlsx, odt, odp, ods|
+| Extract Comments  | docx, pptx, xlsx, odt, odp, ods|
+| Extract Urls  | docx, pptx, xlsx, odt, odp, ods|
+| Search Keyword  | docx, pptx, xlsx, odt, odp, ods|
 | Extract files  | zip, apk, jar, tar.xz, tar.gz, tar.bz2 |
 | Get archives file information  | zip, apk, jar |
 | Get archive information  | zip, apk, jar |
