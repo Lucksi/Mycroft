@@ -727,11 +727,13 @@ class DOCUMENTS:
             Printer.GENERATE.Sentence(touchtype,"None","Ads Touchtype: ",out,output,1,"",vrb)
         elif extension == "zip" or extension == "apk" or extension == "jar":
             Properties.GET.ZIP_FILE(origfile,output,extr,out,vrb)
-        elif extension == "tar.xz" or extension == "tar.gz":
+        elif extension == "tar.xz" or extension == "tar.gz" or extension == "tar.bz2":
             if "xz" in extension:
                 read = "xz"
             elif "gz" in extension:
                 read = "gz"
+            elif "bz2" in extension:
+                read = "bz2"
             Properties.GET.TAR_FILE(origfile,output,extr,out,vrb,read)
         else:
             print(Colors.Color.RED + "\n[!]" + Colors.Color.WHITE + "Not supported {} files".format(Colors.Color.GREEN + extension + Colors.Color.WHITE))
