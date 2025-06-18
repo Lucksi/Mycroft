@@ -97,7 +97,7 @@ python3 main.py
 
 |    Docx Comment Extraction           |      Jpg Image Analysis         |
 | ------------- | ------------- |
-|<img src = "Screenshot/Example_1.png" height = "528px">| <img src = "Screenshot/Example_2.png"> |
+|<img src = "Screenshot/Example_1.png" height = "528px">| <img src = "Screenshot/Example_2.png" height = "528px"> |
 
 ## File Hashing formats:
 
