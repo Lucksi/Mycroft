@@ -43,7 +43,8 @@ class GET:
                         try:
                             for text in string:
                                 content = text.childNodes[0].data
-                                comments.append(content)
+                                if "Reply to" not in content:
+                                    comments.append(content)
                         except Exception as e:
                             continue
                     else:
@@ -51,7 +52,8 @@ class GET:
                         try:
                             for text in string:
                                 content = text.childNodes[0].data
-                                comments.append(content)
+                                if "Reply to" not in content:
+                                    comments.append(content)
                         except Exception as e:
                             continue
                 else:
@@ -60,7 +62,8 @@ class GET:
                         try:
                             for text in string:
                                 content = text.childNodes[0].data
-                                comments.append(content)
+                                if "Reply to" not in content:
+                                    comments.append(content)
                         except Exception as e:
                             continue
 
