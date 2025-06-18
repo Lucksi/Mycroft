@@ -93,6 +93,12 @@ python3 main.py
 | Recognize Suspicious keywords  | pdf |
 | Recognize Encryption Algorithm  | pdf |
 
+## Examples:
+
+|    Docx Comment Extraction           |      Jpg Image Analysis         |
+| ------------- | ------------- |
+|<img src = "Screenshot/Example_1.png" height = "528px">| <img src = "Screenshot/Example_2.png"> |
+
 ## File Hashing formats:
 
 | Name | File-Format |
